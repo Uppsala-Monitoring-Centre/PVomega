@@ -1,7 +1,7 @@
 Package: pvOmega
 Title: Detect Drug-Drug-Event Statistical Patterns in Pharmacovigilance
 Version: 0.0.0.9000
-Authors@R:c(
+Authors@R: c(
     person("Valentina", "Giunchi", , "valentina.giunchi@who-umc.org", role = c("aut", "cre")),
     person("Michele", "Fusaroli", , "michele.fusaroli@who-umc.org", role = "aut"),
     person("Pablo", "Maldonaldo Jimenez", , "pablo.maldonaldo@who-umc.org", role = "aut"),
@@ -20,7 +20,7 @@ Imports:
 Suggests:
     testthat (>= 3.0.0)
 Remotes:
-    fusarolimichele/DiAna_package
+    DiAna=github::fusarolimichele/DiAna_package
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
