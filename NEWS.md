@@ -1,3 +1,3 @@
-# pvOmega (development version)
+# pvOmega 0.0.0.9000
 
-* Initialization.
+* Initial development version.
