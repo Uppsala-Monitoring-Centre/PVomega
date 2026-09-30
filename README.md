@@ -7,8 +7,9 @@
 
 <!-- badges: end -->
 
-The goal of pvOmega is to generate hypotheses on drug-drug interactions
-in databases of adverse event reports.
+The goal of pvOmega is to detect drug-drug-event statistical patterns
+supporting hypotheses generation on drug-drug interactions in databases
+of adverse event reports.
 
 ## Installation
 
