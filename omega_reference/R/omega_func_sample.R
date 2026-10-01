@@ -15,10 +15,10 @@ f10 <- 0
 f11 <- 0.43
 g11 <- 0.0061
 
-E111 = g11 * n11.
+E111 <- g11 * n11.
 
 
-omega <- log2((n111+0.5)/(E111+0.5))
+omega <- log2((n111 + 0.5) / (E111 + 0.5))
 
 
 library(DiAna)
@@ -31,7 +31,7 @@ reac_selected <- "nausea"
 drug_selected1 <- "miconazole"
 drug_selected2 <- "ethinylestradiol"
 temp_drug <- Drug[substance %in% c(drug_selected1, drug_selected2)]
-temp_reac <- Reac[pt %in%  reac_selected]
+temp_reac <- Reac[pt %in% reac_selected]
 pids_drug1 <- unique(temp_drug[substance == drug_selected1]$primaryid)
 pids_drug2 <- unique(temp_drug[substance == drug_selected2]$primaryid)
 pids_reac <- unique(temp_reac$primaryid)
@@ -46,11 +46,10 @@ n10. <- length(setdiff(intersect(pids_drug1, pids_tot), pids_drug2))
 n011 <- length(setdiff(intersect(pids_drug2, pids_reac), pids_drug1))
 n01. <- length(setdiff(intersect(pids_drug2, pids_tot), pids_drug1))
 
-f00 <-  n001/n00.
-f10 <- n101/n10.
-f01 <- n011/n01.
+f00 <- n001 / n00.
+f10 <- n101 / n10.
+f01 <- n011 / n01.
 
-g11 <- 1 - 1/(max(f00/(1-f00), f10/(1-f10)) + max(f00/(1-f00), f01/(1-f01)) - f00/(1-f00) + 1)
-E111 = g11 * n11.
-omega <- log2((n111+0.5)/(E111+0.5))
-
+g11 <- 1 - 1 / (max(f00 / (1 - f00), f10 / (1 - f10)) + max(f00 / (1 - f00), f01 / (1 - f01)) - f00 / (1 - f00) + 1)
+E111 <- g11 * n11.
+omega <- log2((n111 + 0.5) / (E111 + 0.5))
