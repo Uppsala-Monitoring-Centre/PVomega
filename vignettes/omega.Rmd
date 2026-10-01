@@ -1,0 +1,127 @@
+---
+title: "Drug-drug interaction screening with Omega"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Drug-drug interaction screening with Omega}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r setup}
+library(pvOmega)
+```
+
+## What Omega measures
+
+Omega (Noren et al. 2008) is a disproportionality measure for
+drug-drug-event triplets. It compares the observed number of reports
+listing two drugs and an adverse event with the number expected if the two
+drugs did not interact.
+
+"No interaction" is defined by an **additive** risk model: the risk of the
+event under both drugs is the background risk plus the risk attributable to
+each drug. This is the key difference from logistic regression, whose
+interaction term assumes multiplicative risks and misses well-established
+interactions such as cerivastatin with gemfibrozil.
+
+The steps are:
+
+1. Count the reports in each of the four exposure strata: neither drug, D1
+   only, D2 only, both drugs.
+2. Compute the relative reporting rate of the event in each stratum:
+   `f00`, `f10`, `f01`, `f11`.
+3. Estimate the expected rate under both drugs, `g11`, from `f00`, `f10` and
+   `f01` only (eq. 16 of the paper).
+4. Compute the expected count `E111 = g11 * n11.`.
+5. Compute the shrunk ratio `omega = log2((n111 + 0.5) / (E111 + 0.5))` and
+   its Gamma credibility interval.
+
+A triplet is highlighted when `omega_lower` (Omega025) is above 0. With the
+default shrinkage, at least three reports are needed for this.
+
+## Starting from counts
+
+`omega_from_counts()` works with any data source. The example below is the
+first case study of the paper: delayed bleeding with itraconazole and oral
+contraceptives.
+
+```{r}
+res <- omega_from_counts(
+  n111 = 10, n11. = 23, n1.1 = 10, n.11 = 19,
+  n1.. = 39, n.1. = 1489, n..1 = 39, n... = 5503
+)
+res[, .(f00, f10, f01, f11, g11, E111, omega, omega_lower, omega_upper)]
+```
+
+
+## Starting from DiAna FAERS data
+
+With the DiAna data imported, `omega_analysis()` computes all counts and
+returns one row per drug1-drug2-event combination.
+
+```{r, eval = FALSE}
+library(DiAna)
+FAERS_version <- "24Q4"
+import("DEMO")
+import("DRUG")
+import("REAC")
+
+res <- omega_analysis(
+  drug1_selected = "miconazole",
+  drug2_selected = "warfarin",
+  reac_selected = c("international normalised ratio increased", "haemorrhage"),
+  restriction = Demo[!RB_duplicates_only_susp]$primaryid
+)
+res[, .(drug1, drug2, event, f11, g11, label_omega, omega_signal)]
+```
+
+Groups of terms can be collapsed with lists, as in DiAna:
+
+```{r, eval = FALSE}
+omega_analysis(
+  drug1_selected = list(statins = c("simvastatin", "atorvastatin")),
+  drug2_selected = "clarithromycin",
+  reac_selected = list(muscle = c("rhabdomyolysis", "myopathy", "myalgia"))
+)
+```
+
+## Methodological choices to report
+
+Three choices change the counts, and should be stated in any publication:
+
+* **Drug roles** (`drug_roles`). By default only primary suspect, secondary
+  suspect and interacting drugs count as exposure, as at Uppsala Monitoring
+  Centre. Reports where a drug is only concomitant fall into the background
+  stratum.
+* **Deduplication** (`restriction`). FAERS contains duplicate reports. Pass
+  the primary IDs retained by one of DiAna's deduplication algorithms.
+* **Report universe**. The total `n...` is the number of distinct reports in
+  `temp_reac` (within `restriction`). Every count refers to this population.
+
+## Interpreting results
+
+As recommended in the original paper, do not read Omega in isolation. The
+columns `f00`, `f10`, `f01` and `f11` show why a combination was
+highlighted. For example, a large `f10` means D1 alone already explains much
+of the reporting.
+
+The option `no_background = TRUE` adds `omega_nb`, which assumes no
+background risk. A large drop from `omega` to `omega_nb` means the signal
+depends on the estimated background rate.
+
+Rows flagged `"zero_denominator"` (one drug never reported without the other)
+have no estimable Omega and return `NA`.
+
+
+## References
+
+Noren GN, Sundberg R, Bate A, Edwards IR. A statistical methodology for
+drug-drug interaction surveillance. *Stat Med*. 2008;27(16):3057-70.
+
+Hult S, Sartori D, Bergvall T, et al. A feasibility study of drug-drug
+interaction signal detection in regular pharmacovigilance. *Drug Saf*.
+2020;43:775-85.
