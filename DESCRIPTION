@@ -8,8 +8,8 @@ Authors@R: c(
     person("Douglas", "Potter", , "douglas.potter@who-umc.org", role = "aut"),
     person("Niklas", "Noren", , "niklas.noren@who-umc.org", role = "aut")
   )
-Description:  Implements the Omega interaction disproportionality measure of Noren et al.
-(2008) for data in the DiAna data model.
+Description: Implements the Omega interaction disproportionality measure
+    of Noren et al. (2008) for data in the DiAna data model.
 License: Apache License (>= 2)
 Depends:
     R (>= 4.1)
@@ -17,10 +17,13 @@ Imports:
     data.table,
     DiAna
 Suggests:
+    knitr,
     testthat (>= 3.0.0)
+VignetteBuilder: 
+    knitr
 Remotes:
     DiAna=github::fusarolimichele/DiAna_package
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 8.0.0
+Config/roxygen2/version: 8.1.0
