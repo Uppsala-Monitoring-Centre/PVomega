@@ -1,5 +1,5 @@
 Package: pvOmega
-Title: Detect Drug-Drug-Event Statistical Patterns in Pharmacovigilance
+Title: Omega Shrinkage Measure for Drug-Drug Interaction Signal Detection
 Version: 0.0.0.9000
 Authors@R: c(
     person("Valentina", "Giunchi", , "valentina.giunchi@who-umc.org", role = c("aut", "cre")),
@@ -8,9 +8,8 @@ Authors@R: c(
     person("Douglas", "Potter", , "douglas.potter@who-umc.org", role = "aut"),
     person("Niklas", "Noren", , "niklas.noren@who-umc.org", role = "aut")
   )
-Description: The goal of pvOmega is to detect drug-drug-event statistical
-    patterns supporting hypothesis generation on drug-drug interactions in
-    databases of adverse event reports.
+Description:  Implements the Omega interaction disproportionality measure of Noren et al.
+(2008) for data in the DiAna data model.
 License: Apache License (>= 2)
 Depends:
     R (>= 4.1)
