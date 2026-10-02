@@ -31,7 +31,7 @@
 #' @param n... Total number of reports.
 #' @param alpha Shrinkage tuning parameter (default 0.5, as in the paper).
 #'   Must be > 0.
-#' @param conf_level Level of the two-sided credibility interval (default
+#' @param cred_level Level of the two-sided credibility interval (default
 #'   0.95, giving Omega025 and Omega975).
 #'
 #' @return A `data.table` with the input counts, the derived stratum
@@ -56,7 +56,7 @@
 #' @export
 omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
                               alpha = 0.5,
-                              conf_level = 0.95) {
+                              cred_level = 0.95) {
 
   # ---- input validation ----------------------------------------------------
   counts <- list(
@@ -74,9 +74,9 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
   if (!is.numeric(alpha) || length(alpha) != 1L || is.na(alpha) || alpha <= 0) {
     stop("`alpha` must be a single number > 0.", call. = FALSE)
   }
-  if (!is.numeric(conf_level) || length(conf_level) != 1L ||
-    is.na(conf_level) || conf_level <= 0 || conf_level >= 1) {
-    stop("`conf_level` must be a single number in (0, 1).", call. = FALSE)
+  if (!is.numeric(cred_level) || length(cred_level) != 1L ||
+    is.na(cred_level) || cred_level <= 0 || cred_level >= 1) {
+    stop("`cred_level` must be a single number in (0, 1).", call. = FALSE)
   }
 
   len <- max(lengths(counts))
@@ -133,7 +133,7 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
 
   # ---- Omega and credibility interval (eq. 19-20) --------------------------
   omega <- log2((n111 + alpha) / (E111 + alpha))
-  q_low <- (1 - conf_level) / 2
+  q_low <- (1 - cred_level) / 2
   rate <- E111 + alpha
   omega_lower <- log2(stats::qgamma(q_low, shape = n111 + alpha, rate = rate))
   omega_upper <- log2(stats::qgamma(1 - q_low, shape = n111 + alpha, rate = rate))
