@@ -25,6 +25,15 @@
 #' \eqn{\log_2(\alpha_1 / \alpha_2)} instead of 0, which changes the meaning of
 #' the `omega_lower > 0` signal criterion.
 #'
+#' Omega can only be computed when all four D1/D2 strata contain reports
+#' (\eqn{n_{11\cdot}}, \eqn{n_{10\cdot}}, \eqn{n_{01\cdot}},
+#' \eqn{n_{00\cdot}} > 0), so that the reporting rates are defined, and when
+#' \eqn{f_{00}}, \eqn{f_{10}} and \eqn{f_{01}} are below 1, so that the odds
+#' in eq. 16 are finite. \eqn{f_{11} = 1} is valid. Rows that violate these
+#' conditions return `NA` for `g11`, `E111` and the Omega columns, and a single
+#' warning lists the affected rows and the reason. Counts that cannot come from
+#' one set of reports (e.g. a negative cell) raise an error.
+#'
 #' @param n111 Reports listing D1, D2 and the event.
 #' @param n11. Reports listing D1 and D2.
 #' @param n1.1 Reports listing D1 and the event.
@@ -48,7 +57,9 @@
 #'     `n100`, `n011`, `n010`, `n001`, `n000` (they sum to `n...`);
 #'   * the four exposure strata totals `n11.`, `n10.`, `n01.`, `n00.`;
 #'   * `f00`, `f10`, `f01`, `f11`, `g11`, the expected count `E111`, `omega`,
-#'     `omega_lower`, `omega_upper`.
+#'     `omega_lower`, `omega_upper`. Each `f` is `NA` when its stratum is
+#'     empty; `g11`, `E111` and the Omega columns are `NA` for rows where
+#'     Omega cannot be computed (see Details).
 #'
 #' @references Noren GN, Sundberg R, Bate A, Edwards IR. A statistical
 #'   methodology for drug-drug interaction surveillance. Stat Med.
@@ -124,21 +135,39 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
     stop("Inconsistent counts: `n111` exceeds a two-way count.", call. = FALSE)
   }
 
-  # ---- relative reporting rates --------------------------------------------
-  safe_div <- function(num, den) ifelse(den > 0, num / den, NA_real_)
-  f00 <- safe_div(n001, n00.)
-  f10 <- safe_div(n101, n10.)
-  f01 <- safe_div(n011, n01.)
-  f11 <- safe_div(n111, n11.)
+  # ---- Omega-specific validity (rows set to NA with a warning) --------------
+  rules <- omega_validity(n11., n10., n01., n00., n001, n101, n011)
+  ok <- !Reduce(`|`, rules)
+  failed <- vapply(rules, function(x) any(x, na.rm = TRUE), logical(1))
+  if (any(failed)) {
+    details <- vapply(names(rules)[failed], function(rule) {
+      paste0("  - ", rule, " in row(s) ", format_rows(which(rules[[rule]])))
+    }, character(1))
+    warning("Omega could not be computed for ", sum(!ok, na.rm = TRUE),
+      " row(s); returning NA:\n", paste(details, collapse = "\n"),
+      "\nOmega requires reports in all four D1/D2 strata and ",
+      "f00, f10, f01 < 1 (eq. 16).",
+      call. = FALSE
+    )
+  }
 
-  odds <- function(f) ifelse(is.na(f), NA_real_, ifelse(f >= 1, Inf, f / (1 - f)))
+  # ---- relative reporting rates --------------------------------------------
+  # Reported wherever the stratum is non-empty, so invalid rows can be
+  # diagnosed from the output.
+  rate <- function(num, den) ifelse(den > 0, num / den, NA_real_)
+  f00 <- rate(n001, n00.)
+  f10 <- rate(n101, n10.)
+  f01 <- rate(n011, n01.)
+  f11 <- rate(n111, n11.)
+
+  # Only valid rows reach eq. 16, where f00, f10, f01 < 1 keeps the odds finite.
+  odds <- function(f) ifelse(ok, f / (1 - f), NA_real_)
   o00 <- odds(f00)
   o10 <- odds(f10)
   o01 <- odds(f01)
 
   # ---- expected relative reporting rate (eq. 16) ---------------------------
-  den <- pmax(o00, o10) + pmax(o00, o01) - o00 + 1
-  g11 <- ifelse(is.infinite(den), 1, 1 - 1 / den)
+  g11 <- 1 - 1 / (pmax(o00, o10) + pmax(o00, o01) - o00 + 1)
 
   E111 <- g11 * n11.
 
@@ -217,14 +246,45 @@ check_count_consistency <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n.
   }
 
   details <- vapply(names(rules)[failed], function(rule) {
-    rows <- which(!rules[[rule]])
-    shown <- paste(utils::head(rows, 5L), collapse = ", ")
-    if (length(rows) > 5L) shown <- paste0(shown, ", ... (", length(rows), " rows)")
-    paste0("  - ", rule, " violated in row(s) ", shown)
+    paste0("  - ", rule, " violated in row(s) ", format_rows(which(!rules[[rule]])))
   }, character(1))
 
   stop("Inconsistent counts:\n", paste(details, collapse = "\n"),
     "\nCheck that all counts refer to the same set of reports.",
     call. = FALSE
   )
+}
+
+#' Rows where Omega cannot be computed
+#'
+#' Omega needs all four D1/D2 strata to be non-empty (otherwise a reporting
+#' rate is undefined) and `f00`, `f10`, `f01` < 1 (eq. 16 uses `f / (1 - f)`).
+#' `f11 = 1` is valid. The rate rules are only tested where the stratum is
+#' non-empty, so each invalid row is reported for its root cause. `>=` also
+#' catches `f > 1` from counts the consistency checks do not cover.
+#'
+#' @return A named list of logical vectors, `TRUE` where the rule is violated.
+#'   The names are used in the warning message.
+#' @noRd
+omega_validity <- function(n11., n10., n01., n00., n001, n101, n011) {
+  list(
+    "n11. = 0 (no reports with both D1 and D2)" = n11. == 0,
+    "n10. = 0 (no reports with D1 but not D2)" = n10. == 0,
+    "n01. = 0 (no reports with D2 but not D1)" = n01. == 0,
+    "n00. = 0 (no reports with neither D1 nor D2)" = n00. == 0,
+    "f00 = 1 (every report with neither D1 nor D2 lists the event)" =
+      n00. > 0 & n001 >= n00.,
+    "f10 = 1 (every report with D1 but not D2 lists the event)" =
+      n10. > 0 & n101 >= n10.,
+    "f01 = 1 (every report with D2 but not D1 lists the event)" =
+      n01. > 0 & n011 >= n01.
+  )
+}
+
+#' Format row numbers for messages, showing at most five
+#' @noRd
+format_rows <- function(rows) {
+  shown <- paste(utils::head(rows, 5L), collapse = ", ")
+  if (length(rows) > 5L) shown <- paste0(shown, ", ... (", length(rows), " rows)")
+  shown
 }

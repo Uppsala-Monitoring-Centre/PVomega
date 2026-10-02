@@ -113,8 +113,11 @@ The option `no_background = TRUE` adds `omega_nb`, which assumes no
 background risk. A large drop from `omega` to `omega_nb` means the signal
 depends on the estimated background rate.
 
-Rows flagged `"zero_denominator"` (one drug never reported without the other)
-have no estimable Omega and return `NA`.
+Omega cannot be estimated when one of the four D1/D2 strata is empty (for
+example, one drug is never reported without the other), or when every report
+in the D1-only, D2-only or neither-drug stratum lists the event (`f10`, `f01`
+or `f00` equal to 1). Such rows return `NA` for `g11`, `E111` and the Omega
+columns, with a warning that names the affected rows and the reason.
 
 
 ## References

@@ -45,11 +45,19 @@ Gamma prior (default 0.5, as in the paper). Must be > 0.}
 0.95, giving Omega025 and Omega975).}
 }
 \value{
-A \code{data.table} with the input counts, the derived stratum
-denominators, \code{f00}, \code{f10}, \code{f01}, \code{f11}, \code{g11}, the expected count
-\code{E111}, \code{omega}, \code{omega_lower}, \code{omega_upper}, the unshrunk \code{omega0},
-optionally \code{omega_nb}, and \code{omega_flag} (\code{"ok"}, \code{"zero_denominator"} or
-\code{"f_equals_one"}).
+A \code{data.table} with one row per element of the inputs and columns:
+\itemize{
+\item the input marginal counts \code{n1.1}, \code{n.11}, \code{n1..}, \code{n.1.}, \code{n..1},
+\code{n...};
+\item the eight cells of the 2x2x2 contingency table, named by presence (1)
+or absence (0) of D1, D2 and the event: \code{n111}, \code{n110}, \code{n101},
+\code{n100}, \code{n011}, \code{n010}, \code{n001}, \code{n000} (they sum to \code{n...});
+\item the four exposure strata totals \code{n11.}, \code{n10.}, \code{n01.}, \code{n00.};
+\item \code{f00}, \code{f10}, \code{f01}, \code{f11}, \code{g11}, the expected count \code{E111}, \code{omega},
+\code{omega_lower}, \code{omega_upper}. Each \code{f} is \code{NA} when its stratum is
+empty; \code{g11}, \code{E111} and the Omega columns are \code{NA} for rows where
+Omega cannot be computed (see Details).
+}
 }
 \description{
 Computes the Omega shrinkage observed-to-expected ratio for a drug-drug-event
@@ -77,6 +85,15 @@ shrinks Omega towards 0. When \eqn{\alpha_1 \neq \alpha_2}, the prior mean
 is \eqn{\alpha_1 / \alpha_2} and Omega is shrunk towards
 \eqn{\log_2(\alpha_1 / \alpha_2)} instead of 0, which changes the meaning of
 the \code{omega_lower > 0} signal criterion.
+
+Omega can only be computed when all four D1/D2 strata contain reports
+(\eqn{n_{11\cdot}}, \eqn{n_{10\cdot}}, \eqn{n_{01\cdot}},
+\eqn{n_{00\cdot}} > 0), so that the reporting rates are defined, and when
+\eqn{f_{00}}, \eqn{f_{10}} and \eqn{f_{01}} are below 1, so that the odds
+in eq. 16 are finite. \eqn{f_{11} = 1} is valid. Rows that violate these
+conditions return \code{NA} for \code{g11}, \code{E111} and the Omega columns, and a single
+warning lists the affected rows and the reason. Counts that cannot come from
+one set of reports (e.g. a negative cell) raise an error.
 }
 \examples{
 # Itraconazole + oral contraceptives, delayed bleeding

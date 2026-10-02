@@ -109,3 +109,22 @@ test_that("omega_from_table rejects objects that cannot be converted to data.fra
     fixed = TRUE
   )
 })
+
+test_that("omega_from_table returns NA with a warning for invalid rows only", {
+  x <- data.frame(
+    label = c("valid", "no D1 without D2"),
+    n111 = c(10, 2),
+    "n11." = c(23, 10),
+    "n1.1" = c(10, 2),
+    "n.11" = c(19, 4),
+    "n1.." = c(39, 10),
+    "n.1." = c(1489, 40),
+    "n..1" = c(39, 50),
+    "n..." = c(5503, 1000),
+    check.names = FALSE
+  )
+
+  expect_warning(out <- omega_from_table(x), "n10. = 0", fixed = TRUE)
+  expect_equal(as.list(out[1, -1]), as.list(omega_from_table(x[1, -1])))
+  expect_true(is.na(out$omega[2]))
+})
