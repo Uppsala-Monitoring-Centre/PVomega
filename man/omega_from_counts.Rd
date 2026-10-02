@@ -19,21 +19,21 @@ omega_from_counts(
 )
 }
 \arguments{
-\item{n111}{Reports listing D1, D2 and the event.}
+\item{n111}{Number of reports listing D1, D2 and the event.}
 
-\item{n11.}{Reports listing D1 and D2.}
+\item{n11.}{Number of reports listinging D1 and D2.}
 
-\item{n1.1}{Reports listing D1 and the event.}
+\item{n1.1}{Number of reports listinging D1 and the event.}
 
-\item{n.11}{Reports listing D2 and the event.}
+\item{n.11}{Number of reports listinging D2 and the event.}
 
-\item{n1..}{Reports listing D1.}
+\item{n1..}{Number of reports listinging D1.}
 
-\item{n.1.}{Reports listing D2.}
+\item{n.1.}{Number of reports listinging D2.}
 
-\item{n..1}{Reports listing the event.}
+\item{n..1}{Number of reports listinging the event.}
 
-\item{n...}{Total number of reports.}
+\item{n...}{Total number of reports in dataset}
 
 \item{alpha1}{Shrinkage added to the observed count: the shape of the
 Gamma prior (default 0.5, as in the paper). Must be > 0.}
@@ -106,7 +106,7 @@ omega_from_counts(
 \references{
 Noren GN, Sundberg R, Bate A, Edwards IR. A statistical
 methodology for drug-drug interaction surveillance. Stat Med.
-2008;27(16):3057-70. \doi{10.1002/sim.3247}
+2008;27(16):3057-70. doi: 10.1002/sim.3247
 }
 \seealso{
 \code{\link[=omega_from_table]{omega_from_table()}} for counts stored in a data frame.
