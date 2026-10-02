@@ -34,9 +34,9 @@
 #' @param n..1 Reports listing the event.
 #' @param n... Total number of reports.
 #' @param alpha1 Shrinkage added to the observed count: the shape of the
-#'   Gamma prior (default 0.5, as in the paper). Must be > 0.
+#'   Gamma prior (default 0.5, as in the paper). Must be >= 0.
 #' @param alpha2 Shrinkage added to the expected count: the rate of the
-#'   Gamma prior (default 0.5, as in the paper). Must be > 0.
+#'   Gamma prior (default 0.5, as in the paper). Must be >= 0.
 #' @param cred_level Level of the two-sided credibility interval (default
 #'   0.95, giving Omega025 and Omega975).
 #'
