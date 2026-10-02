@@ -1,0 +1,180 @@
+trigger:
+  branches:
+    include:
+      - main
+      - hotfix/*
+  paths:
+    exclude:
+      - README.md
+      - docs/*
+
+resources:
+  repositories:
+    - repository: self
+      ref: main
+      clean: true
+      fetchDepth: 1
+    - repository: research_devops_templates
+      name: 'research-devops-templates'
+      ref: 'refs/heads/main'
+      type: git
+
+variables:
+  - template: variables/vars-shared-devops.yml@research_devops_templates
+  - name: containerRegistry
+    value: "acrdevtestumcdatascience.azurecr.io"
+  - name: imageRepository
+    value: "pvOmega_ci"
+  - name: dockerRegistryServiceConnection
+    value: "wi-devops-acr-acrdevtestumcdatascience-01"
+
+stages:
+  # Build the CI image only when its content (the Dockerfile) is not already in
+  # the registry. The image is tagged with a hash of the Dockerfile, so a given
+  # tag always maps to the same image and the validation stage pulls exactly the
+  # image that matches the current Dockerfile.
+  - stage: BuildImage
+    displayName: Build CI image if missing
+    pool:
+      vmImage: $(linuxDockerBuildAgentVmImage)
+    jobs:
+      - job: BuildPush
+        displayName: Build & push image (only if the tag is absent)
+        steps:
+          - task: Docker@2
+            displayName: Log in to ACR
+            inputs:
+              command: login
+              containerRegistry: $(dockerRegistryServiceConnection)
+
+          - bash: |
+              set -euo pipefail
+              # The Tag is unique per Dockerfile content, so the same Dockerfile
+              # always maps to the same tag (and a change produces a new one).
+              TAG=$(sha256sum azure_pipeline/Dockerfile | cut -c1-12)
+              echo "Dockerfile content tag: $TAG"
+              echo "##vso[task.setvariable variable=imageTag;isOutput=true]$TAG"
+            name: computeTag
+            displayName: Compute the Dockerfile content tag
+
+          - bash: |
+              set -euo pipefail
+              REF="$(containerRegistry)/$(imageRepository):$(computeTag.imageTag)"
+              if docker buildx imagetools inspect "$REF" > /dev/null 2>&1; then
+                echo "$REF already exists - the build step will be skipped."
+                EXISTS=true
+              else
+                echo "$REF not found - the build step will build and push it."
+                EXISTS=false
+              fi
+              echo "##vso[task.setvariable variable=imageExists;isOutput=true]$EXISTS"
+            name: checkImage
+            displayName: Check whether the tag is already in the registry
+
+          - task: Docker@2
+            displayName: Build image
+            condition: and(succeeded(), eq(variables['checkImage.imageExists'], 'false'))
+            inputs:
+              command: buildAndPush
+              containerRegistry: $(dockerRegistryServiceConnection)
+              repository: $(imageRepository)
+              dockerfile: azure_pipeline/Dockerfile
+              buildContext: azure_pipeline
+              tags: $(computeTag.imageTag)
+
+  - stage: PipelineValidation
+    dependsOn: BuildImage
+    displayName: Validation Stage
+    pool:
+      vmImage: $(linuxDockerBuildAgentVmImage)
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq(variables['Build.Reason'], 'PullRequest'),
+          eq(variables['Build.Reason'], 'Schedule'),
+          eq(variables['Build.Reason'], 'Manual')
+        )
+      )
+    jobs:
+      - job: Validation
+        displayName: Run validation checks
+        variables:
+          # Image tag exported by the BuildImage stage's computeTag step. The
+          # address is stageDependencies.<stage>.<job>.outputs['<step>.<var>'],
+          # so each segment must match the producer: BuildImage / BuildPush /
+          # computeTag / imageTag.
+          imageTag: $[ stageDependencies.BuildImage.BuildPush.outputs['computeTag.imageTag'] ]
+          # The directory rlib sits under Agent.TempDirectory because it is
+          # cheap to recreate each run (renv relinks it from the cache), while
+          # the renv cache sits under Pipeline.Workspace because that is the
+          # path the Cache@2 task persists between runs.
+          # RENV_CONFIG_AUTOLOADER_ENABLED=false stops renv's .Rprofile
+          # autoloader from activating on every R start; we activate explicitly
+          # where needed (the test step).
+          dockerRun: >-
+            docker run --rm
+            -v $(Build.SourcesDirectory):/work -w /work
+            -v $(Agent.TempDirectory)/R/library:/rlib
+            -v $(Pipeline.Workspace)/renv-cache:/rcache
+            -e R_LIBS_USER=/rlib
+            -e RENV_PATHS_LIBRARY=/rlib
+            -e RENV_PATHS_CACHE=/rcache
+            -e RENV_CONFIG_AUTOLOADER_ENABLED=false
+        steps:
+          - task: Docker@2
+            displayName: Log in to ACR
+            inputs:
+              command: login
+              containerRegistry: $(dockerRegistryServiceConnection)
+
+          - bash: |
+              set -euo pipefail
+              mkdir -p "$(Agent.TempDirectory)/R/library" "$(Pipeline.Workspace)/renv-cache"
+            displayName: Prepare host R library dirs
+
+          - task: Cache@2
+            displayName: Cache renv package cache
+            inputs:
+              # Tie the cache to the R environment (imageTag = Dockerfile
+              # content hash) and to renv.lock, so it refreshes when either
+              # changes. The restoreKeys give partial reuse when only renv.lock
+              # changed.
+              key: 'renv | "$(Agent.OS)" | $(imageTag) | renv.lock'
+              restoreKeys: |
+                renv | "$(Agent.OS)" | $(imageTag)
+                renv | "$(Agent.OS)"
+              path: '$(Pipeline.Workspace)/renv-cache'
+
+          - bash: |
+              set -euo pipefail
+              # '/rlib' is the in-container library path; it must stay in sync
+              # with the library bind-mount and R_LIBS_USER set in dockerRun.
+              $(dockerRun) $(containerRegistry)/$(imageRepository):$(imageTag) \
+                R -q -e "install.packages('renv', lib = '/rlib', repos = c(CRAN = 'https://packagemanager.posit.co/cran/latest'))"
+              $(dockerRun) $(containerRegistry)/$(imageRepository):$(imageTag) \
+                R -q -e "renv::restore(prompt = FALSE, library = '/rlib')"
+            displayName: Install R dependencies
+
+
+          - bash: |
+              set -euo pipefail
+              $(dockerRun) $(containerRegistry)/$(imageRepository):$(imageTag) \
+                Rscript --vanilla -e "styler::style_dir('R', dry = 'fail'); styler::style_dir('tests', dry = 'fail')"
+            displayName: Check R style formatting
+
+          - bash: |
+              set -euo pipefail
+              $(dockerRun) $(containerRegistry)/$(imageRepository):$(imageTag) \
+                Rscript --vanilla -e "devtools::test(stop_on_failure = TRUE)"
+            displayName: Run tests
+
+          # - bash: |
+          #     $(dockerRun) $(containerRegistry)/$(imageRepository):$(imageTag) \
+          #       python -m sqlfluff lint --ignore parsing,templating --rules LT01,LT02,LT09,LT12,LT13,LT15 sql
+          #   displayName: Check SQL formatting
+
+          # - bash: |
+          #     $(dockerRun) $(containerRegistry)/$(imageRepository):$(imageTag) \
+          #       python -m sqlfluff lint --ignore parsing,templating sql
+          #   displayName: Check SQL linting
