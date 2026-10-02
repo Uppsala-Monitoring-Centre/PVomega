@@ -39,7 +39,6 @@ omega_from_table <- function(x,
                              alpha1 = 0.5,
                              alpha2 = 0.5,
                              cred_level = 0.95) {
-
   if (!is.data.frame(x)) {
     x <- tryCatch(
       as.data.frame(x),
@@ -94,4 +93,3 @@ omega_from_table <- function(x,
 
   cbind(extra, result)[]
 }
-

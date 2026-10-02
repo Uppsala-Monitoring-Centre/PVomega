@@ -63,7 +63,6 @@
 omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
                               alpha1 = 0.5, alpha2 = 0.5,
                               cred_level = 0.95) {
-
   # ---- input validation ----------------------------------------------------
   counts <- list(
     n111 = n111, n11. = n11., n1.1 = n1.1, n.11 = n.11,
@@ -84,7 +83,7 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
     }
   }
   if (!is.numeric(cred_level) || length(cred_level) != 1L ||
-      is.na(cred_level) || cred_level <= 0 || cred_level >= 1) {
+    is.na(cred_level) || cred_level <= 0 || cred_level >= 1) {
     stop("`cred_level` must be a single number in (0, 1).", call. = FALSE)
   }
 
@@ -209,7 +208,9 @@ check_count_consistency <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n.
   )
 
   failed <- vapply(rules, function(ok) any(!ok, na.rm = TRUE), logical(1))
-  if (!any(failed)) return(invisible(TRUE))
+  if (!any(failed)) {
+    return(invisible(TRUE))
+  }
 
   details <- vapply(names(rules)[failed], function(rule) {
     rows <- which(!rules[[rule]])
@@ -219,6 +220,7 @@ check_count_consistency <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n.
   }, character(1))
 
   stop("Inconsistent counts:\n", paste(details, collapse = "\n"),
-       "\nCheck that all counts refer to the same set of reports.",
-       call. = FALSE)
+    "\nCheck that all counts refer to the same set of reports.",
+    call. = FALSE
+  )
 }
