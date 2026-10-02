@@ -40,9 +40,15 @@
 #' @param cred_level Level of the two-sided credibility interval (default
 #'   0.95, giving Omega025 and Omega975).
 #'
-#' @return A `data.table` with the input counts, the derived stratum
-#'   denominators, `f00`, `f10`, `f01`, `f11`, `g11`, the expected count
-#'   `E111`, `omega`, `omega_lower`, `omega_upper`.
+#' @return A `data.table` with one row per element of the inputs and columns:
+#'   * the input marginal counts `n1.1`, `n.11`, `n1..`, `n.1.`, `n..1`,
+#'     `n...`;
+#'   * the eight cells of the 2x2x2 contingency table, named by presence (1)
+#'     or absence (0) of D1, D2 and the event: `n111`, `n110`, `n101`,
+#'     `n100`, `n011`, `n010`, `n001`, `n000` (they sum to `n...`);
+#'   * the four exposure strata totals `n11.`, `n10.`, `n01.`, `n00.`;
+#'   * `f00`, `f10`, `f01`, `f11`, `g11`, the expected count `E111`, `omega`,
+#'     `omega_lower`, `omega_upper`.
 #'
 #' @references Noren GN, Sundberg R, Bate A, Edwards IR. A statistical
 #'   methodology for drug-drug interaction surveillance. Stat Med.
@@ -97,11 +103,16 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
   n101 <- n1.1 - n111
   n011 <- n.11 - n111
   n001 <- n..1 - n1.1 - n.11 + n111
+  n110 <- n11. - n111
+  n100 <- n10. - n101
+  n010 <- n01. - n011
+  n000 <- n00. - n001
 
   cells <- list(
     n10. = n10., n01. = n01., n00. = n00.,
     n101 = n101, n011 = n011, n001 = n001
   )
+
   bad <- vapply(cells, function(x) any(x < 0, na.rm = TRUE), logical(1))
   if (any(bad)) {
     stop("Inconsistent counts: negative cell(s) ",
@@ -141,9 +152,14 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
   omega_upper <- log2(stats::qgamma(1 - q_low, shape = shape, rate = rate))
 
   out <- data.table::data.table(
-    n111 = n111, n11. = n11., n1.1 = n1.1, n.11 = n.11,
+    # input marginal counts
+    n1.1 = n1.1, n.11 = n.11,
     n1.. = n1.., n.1. = n.1., n..1 = n..1, n... = n...,
-    n00. = n00., n10. = n10., n01. = n01.,
+    # full 2x2x2 contingency table (D1, D2, event; 1 = present, 0 = absent)
+    n111 = n111, n110 = n110, n101 = n101, n100 = n100,
+    n011 = n011, n010 = n010, n001 = n001, n000 = n000,
+    # exposure strata totals
+    n11. = n11., n10. = n10., n01. = n01., n00. = n00.,
     f00 = f00, f10 = f10, f01 = f01, f11 = f11,
     g11 = g11, E111 = E111,
     omega = omega, omega_lower = omega_lower, omega_upper = omega_upper
