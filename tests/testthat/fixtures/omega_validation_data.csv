@@ -8,6 +8,8 @@ id,name,nxyz,nxy,nxz,nyz,nx,ny,nz,n,expected_omega,expected_ci
 7,Large: negative,100,5000,3500,2800,12000,8500,6500,45000000,-5.3364,-5.6332
 8,Large: large marginals,800,8000,6000,5000,20000,15000,11200,45000000,-2.7935,-2.8953
 9,Large: very large n,150,3500,2500,2000,10000,7000,5000,45000000,-3.8685,-4.1087
-10,Article: Itraconazole + Diuretics,23,278,78,67,1775,1613,305,9822,0.9380,0.2882
-11,Article: Terfenadine + Digoxin,10,23,10,19,39,1489,39,5503,4.0335,3.0034
-12,Article: Gemfibrozil + Oral Contraceptives,5,27,63,11,6083,5071,3695,3200000,2.8554,1.3278
+10,Article: Diuretics + NSAIDs,25,278,78,67,1775,1613,305,9822,1.1604,0.5394
+11,Article: Itraconazole + Oral Contraceptives,10,23,10,19,39,1489,39,5503,4.0335,3.0034
+12,Article: Terfenadine + Ketoconazole,5,27,63,11,6083,5071,3695,3200000,2.8554,1.3278
+13,Article: Digoxin + Clarithromycin,35,85,1193,245,10650,12390,10781,3200000,1.7202,1.2024
+14,Article: Gemfibrozil + Cerivastatin,1084,1431,1304,3022,6756,9181,6321,3200000,1.4710,1.3838
