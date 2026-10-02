@@ -1,0 +1,4 @@
+**
+!renv.lock
+!azure_pipeline/
+!azure_pipeline/Dockerfile

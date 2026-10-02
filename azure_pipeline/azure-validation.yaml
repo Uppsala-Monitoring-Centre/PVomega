@@ -29,17 +29,20 @@ variables:
     value: "wi-devops-acr-acrdevtestumcdatascience-01"
 
 stages:
-  # Build the CI image only when its content (the Dockerfile) is not already in
-  # the registry. The image is tagged with a hash of the Dockerfile, so a given
-  # tag always maps to the same image and the validation stage pulls exactly the
-  # image that matches the current Dockerfile.
-  - stage: BuildImage
-    displayName: Build CI image if missing
+  # Reuse the CI image for the current Dockerfile and locked R dependencies.
+  # A change to either file produces a new image tag.
+  - stage: PipelineValidation
+    displayName: Prepare CI image and validate
     pool:
       vmImage: $(linuxDockerBuildAgentVmImage)
     jobs:
-      - job: BuildPush
-        displayName: Build & push image (only if the tag is absent)
+      - job: Validation
+        displayName: Reuse or build CI image and run checks
+        variables:
+          runValidation: $[ or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) ]
+          dockerRun: >-
+            docker run --rm --pull=never
+            -v $(Build.SourcesDirectory):/work -w /work
         steps:
           - task: Docker@2
             displayName: Log in to ACR
@@ -49,17 +52,15 @@ stages:
 
           - bash: |
               set -euo pipefail
-              # The Tag is unique per Dockerfile content, so the same Dockerfile
-              # always maps to the same tag (and a change produces a new one).
-              TAG=$(sha256sum azure_pipeline/Dockerfile | cut -c1-12)
-              echo "Dockerfile content tag: $TAG"
-              echo "##vso[task.setvariable variable=imageTag;isOutput=true]$TAG"
+              TAG=$(sha256sum azure_pipeline/Dockerfile renv.lock | sha256sum | cut -c1-12)
+              echo "CI environment content tag: $TAG"
+              echo "##vso[task.setvariable variable=imageTag]$TAG"
             name: computeTag
-            displayName: Compute the Dockerfile content tag
+            displayName: Compute the CI environment content tag
 
           - bash: |
               set -euo pipefail
-              REF="$(containerRegistry)/$(imageRepository):$(computeTag.imageTag)"
+              REF="$(containerRegistry)/$(imageRepository):$(imageTag)"
               if docker buildx imagetools inspect "$REF" > /dev/null 2>&1; then
                 echo "$REF already exists - the build step will be skipped."
                 EXISTS=true
@@ -67,106 +68,39 @@ stages:
                 echo "$REF not found - the build step will build and push it."
                 EXISTS=false
               fi
-              echo "##vso[task.setvariable variable=imageExists;isOutput=true]$EXISTS"
+              echo "##vso[task.setvariable variable=imageExists]$EXISTS"
             name: checkImage
             displayName: Check whether the tag is already in the registry
 
           - task: Docker@2
-            displayName: Build image
-            condition: and(succeeded(), eq(variables['checkImage.imageExists'], 'false'))
+            displayName: Build and push image only when missing
+            condition: and(succeeded(), eq(variables['imageExists'], 'false'))
             inputs:
               command: buildAndPush
               containerRegistry: $(dockerRegistryServiceConnection)
               repository: $(imageRepository)
               dockerfile: azure_pipeline/Dockerfile
-              buildContext: azure_pipeline
-              tags: $(computeTag.imageTag)
-
-  - stage: PipelineValidation
-    dependsOn: BuildImage
-    displayName: Validation Stage
-    pool:
-      vmImage: $(linuxDockerBuildAgentVmImage)
-    condition: |
-      and(
-        succeeded(),
-        or(
-          eq(variables['Build.Reason'], 'PullRequest'),
-          eq(variables['Build.Reason'], 'Schedule'),
-          eq(variables['Build.Reason'], 'Manual')
-        )
-      )
-    jobs:
-      - job: Validation
-        displayName: Run validation checks
-        variables:
-          # Image tag exported by the BuildImage stage's computeTag step. The
-          # address is stageDependencies.<stage>.<job>.outputs['<step>.<var>'],
-          # so each segment must match the producer: BuildImage / BuildPush /
-          # computeTag / imageTag.
-          imageTag: $[ stageDependencies.BuildImage.BuildPush.outputs['computeTag.imageTag'] ]
-          # The directory rlib sits under Agent.TempDirectory because it is
-          # cheap to recreate each run (renv relinks it from the cache), while
-          # the renv cache sits under Pipeline.Workspace because that is the
-          # path the Cache@2 task persists between runs.
-          # RENV_CONFIG_AUTOLOADER_ENABLED=false stops renv's .Rprofile
-          # autoloader from activating on every R start; we activate explicitly
-          # where needed (the test step).
-          dockerRun: >-
-            docker run --rm
-            -v $(Build.SourcesDirectory):/work -w /work
-            -v $(Agent.TempDirectory)/R/library:/rlib
-            -v $(Pipeline.Workspace)/renv-cache:/rcache
-            -e R_LIBS_USER=/rlib
-            -e RENV_PATHS_LIBRARY=/rlib
-            -e RENV_PATHS_CACHE=/rcache
-            -e RENV_CONFIG_AUTOLOADER_ENABLED=false
-        steps:
-          - task: Docker@2
-            displayName: Log in to ACR
-            inputs:
-              command: login
-              containerRegistry: $(dockerRegistryServiceConnection)
+              buildContext: $(Build.SourcesDirectory)
+              tags: $(imageTag)
 
           - bash: |
               set -euo pipefail
-              mkdir -p "$(Agent.TempDirectory)/R/library" "$(Pipeline.Workspace)/renv-cache"
-            displayName: Prepare host R library dirs
-
-          - task: Cache@2
-            displayName: Cache renv package cache
-            inputs:
-              # Tie the cache to the R environment (imageTag = Dockerfile
-              # content hash) and to renv.lock, so it refreshes when either
-              # changes. The restoreKeys give partial reuse when only renv.lock
-              # changed.
-              key: 'renv | "$(Agent.OS)" | $(imageTag) | renv.lock'
-              restoreKeys: |
-                renv | "$(Agent.OS)" | $(imageTag)
-                renv | "$(Agent.OS)"
-              path: '$(Pipeline.Workspace)/renv-cache'
-
-          - bash: |
-              set -euo pipefail
-              # '/rlib' is the in-container library path; it must stay in sync
-              # with the library bind-mount and R_LIBS_USER set in dockerRun.
-              $(dockerRun) $(containerRegistry)/$(imageRepository):$(imageTag) \
-                R -q -e "install.packages('renv', lib = '/rlib', repos = c(CRAN = 'https://packagemanager.posit.co/cran/latest'))"
-              $(dockerRun) $(containerRegistry)/$(imageRepository):$(imageTag) \
-                R -q -e "renv::restore(prompt = FALSE, library = '/rlib')"
-            displayName: Install R dependencies
-
+              docker pull "$(containerRegistry)/$(imageRepository):$(imageTag)"
+            condition: and(succeeded(), eq(variables['runValidation'], 'true'), eq(variables['imageExists'], 'true'))
+            displayName: Pull existing CI image once
 
           - bash: |
               set -euo pipefail
               $(dockerRun) $(containerRegistry)/$(imageRepository):$(imageTag) \
                 Rscript --vanilla -e "styler::style_dir('R', dry = 'fail'); styler::style_dir('tests', dry = 'fail')"
+            condition: and(succeeded(), eq(variables['runValidation'], 'true'))
             displayName: Check R style formatting
 
           - bash: |
               set -euo pipefail
               $(dockerRun) $(containerRegistry)/$(imageRepository):$(imageTag) \
                 Rscript --vanilla -e "devtools::test(stop_on_failure = TRUE)"
+            condition: and(succeeded(), eq(variables['runValidation'], 'true'))
             displayName: Run tests
 
           # - bash: |

@@ -45,7 +45,13 @@ RUN apt-get update && \
     # point R at the installed JDK so rJava can be built/loaded against it
     R CMD javareconf
 
-# NOTE: R packages are NOT baked into this image. The pipeline installs renv and
-# runs renv::restore() into a writable per-run library (R_LIBS_USER), so this
-# image only needs rebuilding when the base R version or system libraries
-# change.
+ENV R_LIBS_USER=/opt/R/library \
+    RENV_PATHS_LIBRARY=/opt/R/library \
+    RENV_CONFIG_CACHE_ENABLED=false \
+    RENV_CONFIG_AUTOLOADER_ENABLED=false
+
+COPY renv.lock /opt/renv/renv.lock
+
+RUN mkdir -p /opt/R/library && \
+    Rscript --vanilla -e "install.packages('renv', lib = Sys.getenv('R_LIBS_USER'), repos = c(CRAN = 'https://packagemanager.posit.co/cran/latest'))" && \
+    Rscript --vanilla -e "renv::restore(project = '/opt/renv', lockfile = '/opt/renv/renv.lock', library = Sys.getenv('R_LIBS_USER'), prompt = FALSE)"
