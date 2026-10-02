@@ -16,7 +16,8 @@
 #'
 #' \deqn{\Omega = \log_2 \frac{n_{111} + \alpha}{E_{111} + \alpha}}
 #'
-#' With `ci_method = "gamma"` (default) the interval limits are log2 quantiles
+#' Following the paper, the selected CI method is a Gamma distribution,
+#' therefore the interval limits are log2 quantiles
 #' of the posterior Gamma(shape = \eqn{n_{111} + \alpha}, rate =
 #' \eqn{E_{111} + \alpha}) distribution (eq. 20).
 #'
@@ -32,11 +33,6 @@
 #'   Must be > 0.
 #' @param conf_level Level of the two-sided credibility interval (default
 #'   0.95, giving Omega025 and Omega975).
-#' @param ci_method `"gamma"` (default, eq. 20 of the paper) or `"normal"`, a
-#'   symmetric normal approximation on the log2 scale with standard error
-#'   \eqn{1 / (\sqrt{n_{111} + \alpha} \log 2)}. The normal approximation is
-#'   provided only to reproduce legacy T-SQL outputs; it is anti-conservative
-#'   for small counts and should not be used for signal detection.
 #' @param no_background Logical. If `TRUE`, also returns the robustness
 #'   variant `omega_nb`, computed assuming no background risk
 #'   (\eqn{g'_{11} = 1 - 1/(o_{10} + o_{01} + 1)}, Section 4 of the paper).
@@ -64,9 +60,7 @@
 omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
                               alpha = 0.5,
                               conf_level = 0.95,
-                              ci_method = c("gamma", "normal"),
                               no_background = FALSE) {
-  ci_method <- match.arg(ci_method)
 
   # ---- input validation ----------------------------------------------------
   counts <- list(
@@ -144,17 +138,9 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
   # ---- Omega and credibility interval (eq. 19-20) --------------------------
   omega <- log2((n111 + alpha) / (E111 + alpha))
   q_low <- (1 - conf_level) / 2
-
-  if (ci_method == "gamma") {
-    rate <- E111 + alpha
-    omega_lower <- log2(stats::qgamma(q_low, shape = n111 + alpha, rate = rate))
-    omega_upper <- log2(stats::qgamma(1 - q_low, shape = n111 + alpha, rate = rate))
-  } else {
-    se <- 1 / (sqrt(n111 + alpha) * log(2))
-    z <- stats::qnorm(1 - q_low)
-    omega_lower <- omega - z * se
-    omega_upper <- omega + z * se
-  }
+  rate <- E111 + alpha
+  omega_lower <- log2(stats::qgamma(q_low, shape = n111 + alpha, rate = rate))
+  omega_upper <- log2(stats::qgamma(1 - q_low, shape = n111 + alpha, rate = rate))
 
   omega0 <- ifelse(n111 > 0 & E111 > 0, log2(n111 / E111), NA_real_)
 
