@@ -32,8 +32,9 @@ omega_analysis(
 # Import FAERS data
 library(data.table)
 
-Drug <- setDT(readRDS("C:/Users/valentinag/OneDrive - WHO Collaborating Centre for Int Drug Monitoring/Desktop/DiAna on FAERS/data/24Q4/DRUG.rds"))
-Reac <- setDT(readRDS("C:/Users/valentinag/OneDrive - WHO Collaborating Centre for Int Drug Monitoring/Desktop/DiAna on FAERS/data/24Q4/REAC.rds"))
+data_dir <- Sys.getenv("FAERS_DATA_DIR")
+Drug <- setDT(readRDS(file.path(data_dir, "DRUG.rds")))
+Reac <- setDT(readRDS(file.path(data_dir, "REAC.rds")))
 
 omega_analysis(
   drug1_selected = "gemfibrozil",
