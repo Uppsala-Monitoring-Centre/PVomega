@@ -17,7 +17,9 @@ Imports:
     data.table,
     DiAna
 Suggests:
+    devtools,
     knitr,
+    styler,
     testthat (>= 3.0.0)
 VignetteBuilder: 
     knitr
