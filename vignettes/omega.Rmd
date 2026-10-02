@@ -58,49 +58,40 @@ res[, .(f00, f10, f01, f11, g11, E111, omega, omega_lower, omega_upper)]
 ```
 
 
-## Starting from DiAna FAERS data
+## Starting from a table of counts
 
-With the DiAna data imported, `omega_analysis()` computes all counts and
-returns one row per drug1-drug2-event combination.
+`omega_from_table()` takes a data frame with one row per drug1-drug2-event
+combination and one column per count (`n111`, `n11.`, `n1.1`, `n.11`, `n1..`,
+`n.1.`, `n..1`, `n...`). Other columns, such as labels, are kept in the
+output.
 
-```{r, eval = FALSE}
-library(DiAna)
-FAERS_version <- "24Q4"
-import("DEMO")
-import("DRUG")
-import("REAC")
-
-res <- omega_analysis(
-  drug1_selected = "miconazole",
-  drug2_selected = "warfarin",
-  reac_selected = c("international normalised ratio increased", "haemorrhage"),
-  restriction = Demo[!RB_duplicates_only_susp]$primaryid
+```{r}
+counts <- data.frame(
+  drug1 = c("itraconazole", "drug A"),
+  drug2 = c("oral contraceptives", "drug B"),
+  event = c("delayed bleeding", "event X"),
+  n111 = c(10, 45), `n11.` = c(23, 250), `n1.1` = c(10, 120),
+  `n.11` = c(19, 85), `n1..` = c(39, 580), `n.1.` = c(1489, 420),
+  `n..1` = c(39, 340), `n...` = c(5503, 50000),
+  check.names = FALSE
 )
-res[, .(drug1, drug2, event, f11, g11, label_omega, omega_signal)]
-```
-
-Groups of terms can be collapsed with lists, as in DiAna:
-
-```{r, eval = FALSE}
-omega_analysis(
-  drug1_selected = list(statins = c("simvastatin", "atorvastatin")),
-  drug2_selected = "clarithromycin",
-  reac_selected = list(muscle = c("rhabdomyolysis", "myopathy", "myalgia"))
-)
+res <- omega_from_table(counts)
+res[, .(drug1, drug2, event, f11, g11, omega, omega_lower, omega_upper)]
 ```
 
 ## Methodological choices to report
 
-Three choices change the counts, and should be stated in any publication:
+The counts come from your own data, and three choices made when building
+them change the results. State them in any publication:
 
-* **Drug roles** (`drug_roles`). By default only primary suspect, secondary
-  suspect and interacting drugs count as exposure, as at Uppsala Monitoring
-  Centre. Reports where a drug is only concomitant fall into the background
-  stratum.
-* **Deduplication** (`restriction`). FAERS contains duplicate reports. Pass
-  the primary IDs retained by one of DiAna's deduplication algorithms.
-* **Report universe**. The total `n...` is the number of distinct reports in
-  `temp_reac` (within `restriction`). Every count refers to this population.
+* **Drug roles**. Which reported drugs count as exposure. At Uppsala
+  Monitoring Centre only primary suspect, secondary suspect and interacting
+  drugs count (Hult et al. 2020); reports where a drug is only concomitant
+  then fall into the background stratum.
+* **Deduplication**. Spontaneous reporting databases such as FAERS contain
+  duplicate reports, which should be removed before counting.
+* **Report universe**. The total `n...` defines the population of reports.
+  Every other count must refer to this same set of reports.
 
 ## Interpreting results
 
@@ -108,10 +99,6 @@ As recommended in the original paper, do not read Omega in isolation. The
 columns `f00`, `f10`, `f01` and `f11` show why a combination was
 highlighted. For example, a large `f10` means D1 alone already explains much
 of the reporting.
-
-The option `no_background = TRUE` adds `omega_nb`, which assumes no
-background risk. A large drop from `omega` to `omega_nb` means the signal
-depends on the estimated background rate.
 
 Omega cannot be estimated when one of the four D1/D2 strata is empty (for
 example, one drug is never reported without the other), or when every report

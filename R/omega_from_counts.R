@@ -65,7 +65,7 @@
 #'   methodology for drug-drug interaction surveillance. Stat Med.
 #'   2008;27(16):3057-70. \doi{10.1002/sim.3247}
 #'
-#' @seealso [omega_analysis()] to compute the counts from DiAna FAERS tables.
+#' @seealso [omega_from_table()] for counts stored in a data frame.
 #'
 #' @examples
 #' # Itraconazole + oral contraceptives, delayed bleeding
