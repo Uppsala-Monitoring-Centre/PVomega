@@ -109,6 +109,3 @@ test_that("omega_from_table rejects objects that cannot be converted to data.fra
     fixed = TRUE
   )
 })
-
-
-

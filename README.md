@@ -4,6 +4,7 @@
 # pvOmega
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 The goal of pvOmega is to detect drug-drug-event statistical patterns
