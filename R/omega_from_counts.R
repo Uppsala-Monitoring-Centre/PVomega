@@ -163,3 +163,62 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
   data.table::set(out, j = "omega_flag", value = omega_flag)
   out[]
 }
+
+#' Check that report counts form a valid 2x2x2 table
+#'
+#' Two levels of checks, applied element-wise to vectorised counts:
+#'
+#' 1. Subset rules: a count can never exceed the count of a set that contains
+#'    it (e.g. reports with D1, D2 and the event are a subset of reports with
+#'    D1 and D2, so `n111 <= n11.`).
+#' 2. Cell rules: the eight cells of the 2x2x2 table, derived by
+#'    inclusion-exclusion, must all be non-negative. This catches
+#'    inconsistencies the subset rules miss, e.g. `n1.. + n.1. - n11. > n...`.
+#'
+#' Together the cell rules are necessary and sufficient for the counts to come
+#' from one set of reports; the subset rules are implied by them but give
+#' clearer error messages. All violations are reported in one error, with the
+#' affected rows. `NA` values are ignored.
+#' @noRd
+check_count_consistency <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...) {
+  rules <- list(
+    # three-way count within each two-way count
+    "n111 <= n11." = n111 <= n11.,
+    "n111 <= n1.1" = n111 <= n1.1,
+    "n111 <= n.11" = n111 <= n.11,
+    # two-way counts within each one-way count
+    "n11. <= n1.." = n11. <= n1..,
+    "n11. <= n.1." = n11. <= n.1.,
+    "n1.1 <= n1.." = n1.1 <= n1..,
+    "n1.1 <= n..1" = n1.1 <= n..1,
+    "n.11 <= n.1." = n.11 <= n.1.,
+    "n.11 <= n..1" = n.11 <= n..1,
+    # one-way counts within the total
+    "n1.. <= n..." = n1.. <= n...,
+    "n.1. <= n..." = n.1. <= n...,
+    "n..1 <= n..." = n..1 <= n...,
+    # cells of the 2x2x2 table must be non-negative (inclusion-exclusion)
+    "cell D1, D2, no event >= 0" = n11. - n111 >= 0,
+    "cell D1, no D2, event >= 0" = n1.1 - n111 >= 0,
+    "cell no D1, D2, event >= 0" = n.11 - n111 >= 0,
+    "cell D1 only, no event >= 0" = n1.. - n11. - n1.1 + n111 >= 0,
+    "cell D2 only, no event >= 0" = n.1. - n11. - n.11 + n111 >= 0,
+    "cell event only, no drug >= 0" = n..1 - n1.1 - n.11 + n111 >= 0,
+    "cell no drug, no event >= 0" =
+      n... - n1.. - n.1. - n..1 + n11. + n1.1 + n.11 - n111 >= 0
+  )
+
+  failed <- vapply(rules, function(ok) any(!ok, na.rm = TRUE), logical(1))
+  if (!any(failed)) return(invisible(TRUE))
+
+  details <- vapply(names(rules)[failed], function(rule) {
+    rows <- which(!rules[[rule]])
+    shown <- paste(utils::head(rows, 5L), collapse = ", ")
+    if (length(rows) > 5L) shown <- paste0(shown, ", ... (", length(rows), " rows)")
+    paste0("  - ", rule, " violated in row(s) ", shown)
+  }, character(1))
+
+  stop("Inconsistent counts:\n", paste(details, collapse = "\n"),
+       "\nCheck that all counts refer to the same set of reports.",
+       call. = FALSE)
+}
