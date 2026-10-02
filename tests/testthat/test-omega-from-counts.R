@@ -24,3 +24,39 @@ test_that("Omega from counts works against article example", {
     )
   )
 })
+
+test_that("omega_from_counts validates omega and credibility interval against diverse scenarios", {
+  test_data <- read.csv(
+    test_path("fixtures/omega_validation_data.csv"),
+    stringsAsFactors = FALSE
+  )
+
+  results <- omega_from_counts(
+    n111 = test_data$nxyz,
+    n11. = test_data$nxy,
+    n1.1 = test_data$nxz,
+    n.11 = test_data$nyz,
+    n1.. = test_data$nx,
+    n.1. = test_data$ny,
+    n..1 = test_data$nz,
+    n... = test_data$n
+  )
+
+  omega_match <- abs(results$omega - test_data$expected_omega) < 1e-3
+  ci_match <- abs(results$omega_lower - test_data$expected_ci) < 1e-3
+
+  for (i in seq_len(nrow(test_data))) {
+    expect_true(
+      omega_match[i],
+      label = paste("Omega match:", test_data$name[i])
+    )
+    expect_true(
+      ci_match[i],
+      label = paste("CI lower bound match:", test_data$name[i])
+    )
+  }
+
+  expect_true(all(results$omega_flag == "ok"),
+    label = "No computation errors"
+  )
+})
