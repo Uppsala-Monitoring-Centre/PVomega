@@ -13,6 +13,18 @@ FROM rocker/r-ver:4.6.0
 # of the packages which do not need them.
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+        curl \
+        libcurl4-openssl-dev \
+        libglpk-dev \
+        pkg-config \
+        libfontconfig1-dev \
+        libfreetype6-dev \
+        libharfbuzz-dev \
+        libfribidi-dev \
+        libpng-dev \
+        libtiff-dev \
+        libjpeg-dev \
+        libwebp-dev \
         # fs
         cmake \
         # DatabaseConnector, SqlRender
