@@ -18,15 +18,12 @@ library(pvOmega)
 ## What Omega measures
 
 Omega (Noren et al. 2008) is a disproportionality measure for
-drug-drug-event triplets. It compares the observed number of reports
+drug-drug-event combination. It compares the observed number of reports
 listing two drugs and an adverse event with the number expected if the two
 drugs did not interact.
 
-"No interaction" is defined by an **additive** risk model: the risk of the
-event under both drugs is the background risk plus the risk attributable to
-each drug. This is the key difference from logistic regression, whose
-interaction term assumes multiplicative risks and misses well-established
-interactions such as cerivastatin with gemfibrozil.
+"No interaction" is defined by an **additive** model: the reporting rate of the
+event under both drugs is the background reporting rate plus the contribution attributable to each drug. This is the key difference from logistic regression, whose interaction term assumes multiplicative effects of separate drugs and misses well-established interactions such as cerivastatin with gemfibrozil.
 
 The steps are:
 
@@ -40,8 +37,7 @@ The steps are:
 5. Compute the shrunk ratio `omega = log2((n111 + 0.5) / (E111 + 0.5))` and
    its Gamma credibility interval.
 
-A triplet is highlighted when `omega_lower` (Omega025) is above 0. With the
-default shrinkage, at least three reports are needed for this.
+A potential interaction is highlighted when `omega_lower` is above 0.
 
 ## Starting from counts
 
@@ -73,8 +69,12 @@ counts <- data.frame(
   n111 = c(10, 45), `n11.` = c(23, 250), `n1.1` = c(10, 120),
   `n.11` = c(19, 85), `n1..` = c(39, 580), `n.1.` = c(1489, 420),
   `n..1` = c(39, 340), `n...` = c(5503, 50000),
-  check.names = FALSE
-)
+  check.names = FALSE)
+```
+
+Groups of terms can be collapsed with lists, as in DiAna:
+
+```{r, eval = FALSE}
 res <- omega_from_table(counts)
 res[, .(drug1, drug2, event, f11, g11, omega, omega_lower, omega_upper)]
 ```
@@ -99,6 +99,7 @@ As recommended in the original paper, do not read Omega in isolation. The
 columns `f00`, `f10`, `f01` and `f11` show why a combination was
 highlighted. For example, a large `f10` means D1 alone already explains much
 of the reporting.
+
 
 Omega cannot be estimated when one of the four D1/D2 strata is empty (for
 example, one drug is never reported without the other), or when every report
