@@ -61,7 +61,7 @@
 #' )
 #' @export
 omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
-                              alpha = 0.5, alpha2 = 0.5,
+                              alpha1 = 0.5, alpha2 = 0.5,
                               cred_level = 0.95) {
 
   # ---- input validation ----------------------------------------------------
