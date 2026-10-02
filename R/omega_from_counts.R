@@ -14,12 +14,16 @@
 #' reporting rate of the event in the stratum exposed to D1 (`i`) and D2 (`j`).
 #' The expected count is \eqn{E_{111} = g_{11} n_{11\cdot}} and
 #'
-#' \deqn{\Omega = \log_2 \frac{n_{111} + \alpha}{E_{111} + \alpha}}
+#' \deqn{\Omega = \log_2 \frac{n_{111} + \alpha_1}{E_{111} + \alpha_2}}
 #'
-#' Following the paper, the selected CI method is a Gamma distribution,
-#' therefore the interval limits are log2 quantiles
-#' of the posterior Gamma(shape = \eqn{n_{111} + \alpha}, rate =
-#' \eqn{E_{111} + \alpha}) distribution (eq. 20).
+#' Following the paper, the interval limits are log2 quantiles of the posterior
+#' Gamma(shape = \eqn{n_{111} + \alpha_1}, rate = \eqn{E_{111} + \alpha_2})
+#' distribution (eq. 20).
+#' The paper uses \eqn{\alpha_1 = \alpha_2 = 0.5}, a prior with mean 1 that
+#' shrinks Omega towards 0. When \eqn{\alpha_1 \neq \alpha_2}, the prior mean
+#' is \eqn{\alpha_1 / \alpha_2} and Omega is shrunk towards
+#' \eqn{\log_2(\alpha_1 / \alpha_2)} instead of 0, which changes the meaning of
+#' the `omega_lower > 0` signal criterion.
 #'
 #' @param n111 Reports listing D1, D2 and the event.
 #' @param n11. Reports listing D1 and D2.
@@ -29,8 +33,10 @@
 #' @param n.1. Reports listing D2.
 #' @param n..1 Reports listing the event.
 #' @param n... Total number of reports.
-#' @param alpha Shrinkage tuning parameter (default 0.5, as in the paper).
-#'   Must be > 0.
+#' @param alpha1 Shrinkage added to the observed count: the shape of the
+#'   Gamma prior (default 0.5, as in the paper). Must be > 0.
+#' @param alpha2 Shrinkage added to the expected count: the rate of the
+#'   Gamma prior (default 0.5, as in the paper). Must be > 0.
 #' @param cred_level Level of the two-sided credibility interval (default
 #'   0.95, giving Omega025 and Omega975).
 #'
@@ -55,7 +61,7 @@
 #' )
 #' @export
 omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
-                              alpha = 0.5,
+                              alpha = 0.5, alpha2 = 0.5,
                               cred_level = 0.95) {
 
   # ---- input validation ----------------------------------------------------
@@ -71,11 +77,14 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
       stop("`", nm, "` must contain whole numbers.", call. = FALSE)
     }
   }
-  if (!is.numeric(alpha) || length(alpha) != 1L || is.na(alpha) || alpha <= 0) {
-    stop("`alpha` must be a single number > 0.", call. = FALSE)
+  for (nm in c("alpha1", "alpha2")) {
+    a <- get(nm)
+    if (!is.numeric(a) || length(a) != 1L || is.na(a) || a <= 0) {
+      stop("`", nm, "` must be a single number > 0.", call. = FALSE)
+    }
   }
   if (!is.numeric(cred_level) || length(cred_level) != 1L ||
-    is.na(cred_level) || cred_level <= 0 || cred_level >= 1) {
+      is.na(cred_level) || cred_level <= 0 || cred_level >= 1) {
     stop("`cred_level` must be a single number in (0, 1).", call. = FALSE)
   }
 
@@ -132,11 +141,12 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
   E111 <- g11 * n11.
 
   # ---- Omega and credibility interval (eq. 19-20) --------------------------
-  omega <- log2((n111 + alpha) / (E111 + alpha))
+  shape <- n111 + alpha1
+  rate <- E111 + alpha2
+  omega <- log2(shape / rate)
   q_low <- (1 - cred_level) / 2
-  rate <- E111 + alpha
-  omega_lower <- log2(stats::qgamma(q_low, shape = n111 + alpha, rate = rate))
-  omega_upper <- log2(stats::qgamma(1 - q_low, shape = n111 + alpha, rate = rate))
+  omega_lower <- log2(stats::qgamma(q_low, shape = shape, rate = rate))
+  omega_upper <- log2(stats::qgamma(1 - q_low, shape = shape, rate = rate))
 
   omega0 <- ifelse(n111 > 0 & E111 > 0, log2(n111 / E111), NA_real_)
 
