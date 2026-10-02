@@ -9,9 +9,9 @@ test_that("Omega from counts works against article example", {
       n.1. = 1489,
       n..1 = 39,
       n... = 5503,
-      alpha = 0.5,
-      conf_level = 0.95,
-      ci_method <- "gamma"
+      alpha1 = 0.5,
+      alpha2 = 0.5,
+      cred_level = 0.95
     ),
     data.table::data.table(
       n111 = 10, n11. = 23, n1.1 = 10, n.11 = 19, n1.. = 33,
