@@ -33,9 +33,6 @@
 #'   Must be > 0.
 #' @param conf_level Level of the two-sided credibility interval (default
 #'   0.95, giving Omega025 and Omega975).
-#' @param no_background Logical. If `TRUE`, also returns the robustness
-#'   variant `omega_nb`, computed assuming no background risk
-#'   (\eqn{g'_{11} = 1 - 1/(o_{10} + o_{01} + 1)}, Section 4 of the paper).
 #'
 #' @return A `data.table` with the input counts, the derived stratum
 #'   denominators, `f00`, `f10`, `f01`, `f11`, `g11`, the expected count
@@ -59,8 +56,7 @@
 #' @export
 omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
                               alpha = 0.5,
-                              conf_level = 0.95,
-                              no_background = FALSE) {
+                              conf_level = 0.95) {
 
   # ---- input validation ----------------------------------------------------
   counts <- list(
@@ -153,13 +149,6 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
     omega = omega, omega_lower = omega_lower, omega_upper = omega_upper,
     omega0 = omega0
   )
-
-  if (isTRUE(no_background)) {
-    den_nb <- o10 + o01 + 1
-    g11_nb <- ifelse(is.infinite(den_nb), 1, 1 - 1 / den_nb)
-    E_nb <- g11_nb * n11.
-    data.table::set(out, j = "omega_nb", value = log2((n111 + alpha) / (E_nb + alpha)))
-  }
 
   data.table::set(out, j = "omega_flag", value = omega_flag)
   out[]
