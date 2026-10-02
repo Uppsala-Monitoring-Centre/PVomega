@@ -19,8 +19,7 @@ test_that("Omega from counts works against article example", {
       n01. = 1466, f00 = 0.004995004995005, f10 = 0, f01 = 0.00613915416098226,
       f11 = 0.434782608695652, g11 = 0.00613915416098232, E111 = 0.141200545702593,
       omega = 4.03346986434757, omega_lower = 3.00332741843529,
-      omega_upper = 4.79004083721906, omega0 = 6.14611052552184,
-      omega_flag = "ok"
+      omega_upper = 4.79004083721906
     )
   )
 })

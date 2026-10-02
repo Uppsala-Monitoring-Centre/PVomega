@@ -42,9 +42,7 @@
 #'
 #' @return A `data.table` with the input counts, the derived stratum
 #'   denominators, `f00`, `f10`, `f01`, `f11`, `g11`, the expected count
-#'   `E111`, `omega`, `omega_lower`, `omega_upper`, the unshrunk `omega0`,
-#'   optionally `omega_nb`, and `omega_flag` (`"ok"`, `"zero_denominator"` or
-#'   `"f_equals_one"`).
+#'   `E111`, `omega`, `omega_lower`, `omega_upper`.
 #'
 #' @references Noren GN, Sundberg R, Bate A, Edwards IR. A statistical
 #'   methodology for drug-drug interaction surveillance. Stat Med.
@@ -132,12 +130,6 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
   den <- pmax(o00, o10) + pmax(o00, o01) - o00 + 1
   g11 <- ifelse(is.infinite(den), 1, 1 - 1 / den)
 
-  zero_den <- n10. == 0 | n01. == 0
-  f_one <- !is.na(f10) & f10 >= 1 | !is.na(f01) & f01 >= 1
-  omega_flag <- ifelse(n00. == 0, "zero_denominator",
-    ifelse(f_one, "f_equals_one", "ok")
-  )
-
   E111 <- g11 * n11.
 
   # ---- Omega and credibility interval (eq. 19-20) --------------------------
@@ -148,19 +140,15 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
   omega_lower <- log2(stats::qgamma(q_low, shape = shape, rate = rate))
   omega_upper <- log2(stats::qgamma(1 - q_low, shape = shape, rate = rate))
 
-  omega0 <- ifelse(n111 > 0 & E111 > 0, log2(n111 / E111), NA_real_)
-
   out <- data.table::data.table(
     n111 = n111, n11. = n11., n1.1 = n1.1, n.11 = n.11,
     n1.. = n1.., n.1. = n.1., n..1 = n..1, n... = n...,
     n00. = n00., n10. = n10., n01. = n01.,
     f00 = f00, f10 = f10, f01 = f01, f11 = f11,
     g11 = g11, E111 = E111,
-    omega = omega, omega_lower = omega_lower, omega_upper = omega_upper,
-    omega0 = omega0
+    omega = omega, omega_lower = omega_lower, omega_upper = omega_upper
   )
 
-  data.table::set(out, j = "omega_flag", value = omega_flag)
   out[]
 }
 
