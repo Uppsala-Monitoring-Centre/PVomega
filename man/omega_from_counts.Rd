@@ -13,10 +13,9 @@ omega_from_counts(
   n.1.,
   n..1,
   n...,
-  alpha = 0.5,
-  conf_level = 0.95,
-  ci_method = c("gamma", "normal"),
-  no_background = FALSE
+  alpha1 = 0.5,
+  alpha2 = 0.5,
+  cred_level = 0.95
 )
 }
 \arguments{
@@ -36,21 +35,14 @@ omega_from_counts(
 
 \item{n...}{Total number of reports.}
 
-\item{alpha}{Shrinkage tuning parameter (default 0.5, as in the paper).
-Must be > 0.}
+\item{alpha1}{Shrinkage added to the observed count: the shape of the
+Gamma prior (default 0.5, as in the paper). Must be > 0.}
 
-\item{conf_level}{Level of the two-sided credibility interval (default
+\item{alpha2}{Shrinkage added to the expected count: the rate of the
+Gamma prior (default 0.5, as in the paper). Must be > 0.}
+
+\item{cred_level}{Level of the two-sided credibility interval (default
 0.95, giving Omega025 and Omega975).}
-
-\item{ci_method}{\code{"gamma"} (default, eq. 20 of the paper) or \code{"normal"}, a
-symmetric normal approximation on the log2 scale with standard error
-\eqn{1 / (\sqrt{n_{111} + \alpha} \log 2)}. The normal approximation is
-provided only to reproduce legacy T-SQL outputs; it is anti-conservative
-for small counts and should not be used for signal detection.}
-
-\item{no_background}{Logical. If \code{TRUE}, also returns the robustness
-variant \code{omega_nb}, computed assuming no background risk
-(\eqn{g'_{11} = 1 - 1/(o_{10} + o_{01} + 1)}, Section 4 of the paper).}
 }
 \value{
 A \code{data.table} with the input counts, the derived stratum
@@ -75,11 +67,16 @@ where \eqn{o_{ij} = f_{ij} / (1 - f_{ij})} and \eqn{f_{ij}} is the relative
 reporting rate of the event in the stratum exposed to D1 (\code{i}) and D2 (\code{j}).
 The expected count is \eqn{E_{111} = g_{11} n_{11\cdot}} and
 
-\deqn{\Omega = \log_2 \frac{n_{111} + \alpha}{E_{111} + \alpha}}
+\deqn{\Omega = \log_2 \frac{n_{111} + \alpha_1}{E_{111} + \alpha_2}}
 
-With \code{ci_method = "gamma"} (default) the interval limits are log2 quantiles
-of the posterior Gamma(shape = \eqn{n_{111} + \alpha}, rate =
-\eqn{E_{111} + \alpha}) distribution (eq. 20).
+Following the paper, the interval limits are log2 quantiles of the posterior
+Gamma(shape = \eqn{n_{111} + \alpha_1}, rate = \eqn{E_{111} + \alpha_2})
+distribution (eq. 20).
+The paper uses \eqn{\alpha_1 = \alpha_2 = 0.5}, a prior with mean 1 that
+shrinks Omega towards 0. When \eqn{\alpha_1 \neq \alpha_2}, the prior mean
+is \eqn{\alpha_1 / \alpha_2} and Omega is shrunk towards
+\eqn{\log_2(\alpha_1 / \alpha_2)} instead of 0, which changes the meaning of
+the \code{omega_lower > 0} signal criterion.
 }
 \examples{
 # Itraconazole + oral contraceptives, delayed bleeding
