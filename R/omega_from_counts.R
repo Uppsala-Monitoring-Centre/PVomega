@@ -199,6 +199,24 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
   out[]
 }
 
+#' Warn when a denominator is zero
+#' Issues one warning per type of zero denominator, listing the affected rows
+#' (at most 5) and the consequence for the results. `NA` conditions are
+#' ignored.
+#' @noRd
+warn_zero_denominator <- function(condition, what, consequence) {
+  rows <- which(condition)
+  if (length(rows) == 0L) {
+    return(invisible(FALSE))
+  }
+  shown <- paste(utils::head(rows, 5L), collapse = ", ")
+  if (length(rows) > 5L) shown <- paste0(shown, ", ... (", length(rows), " rows)")
+  warning("Zero denominator: ", what, " in row(s) ", shown, "; ", consequence, ".",
+          call. = FALSE)
+  invisible(TRUE)
+}
+
+
 #' Check that report counts form a valid 2x2x2 table
 #'
 #' Two levels of checks, applied element-wise to vectorised counts:
