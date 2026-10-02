@@ -24,7 +24,7 @@ variables:
   - name: containerRegistry
     value: "acrdevtestumcdatascience.azurecr.io"
   - name: imageRepository
-    value: "pvOmega_ci"
+    value: "pvomega_ci"
   - name: dockerRegistryServiceConnection
     value: "wi-devops-acr-acrdevtestumcdatascience-01"
 
