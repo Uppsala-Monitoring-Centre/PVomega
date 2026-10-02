@@ -91,7 +91,23 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
     stop("`cred_level` must be a single number in (0, 1).", call. = FALSE)
   }
 
-  len <- max(lengths(counts))
+  # all counts must have the same length; length-1 counts (e.g. a constant
+  # n...) are recycled to that length
+  lens <- lengths(counts)
+  if (any(lens == 0L)) {
+    stop("Count(s) of length zero: ",
+         paste(names(lens)[lens == 0L], collapse = ", "), ".",
+         call. = FALSE
+    )
+  }
+
+  len <- max(lens)
+  if (any(lens != 1L & lens != len)) {
+    stop("All counts must have the same length, or length 1. Lengths: ",
+         paste0(names(lens), " = ", lens, collapse = ", "), ".",
+         call. = FALSE
+    )
+  }
   counts <- lapply(counts, function(x) rep_len(as.numeric(x), len))
   list2env(counts, envir = environment())
 
