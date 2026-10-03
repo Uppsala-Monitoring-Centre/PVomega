@@ -34,7 +34,7 @@ RUN apt-get update && \
         # RPostgres
         libpq-dev \
         # fs
-        libuv1 \
+        libuv1-dev \
         # clipr
         libx11-dev \
         # xml2
