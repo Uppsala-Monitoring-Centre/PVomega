@@ -130,9 +130,13 @@ of the reporting.
 
 ## References
 
-Noren GN, Sundberg R, Bate A, Edwards IR. A statistical methodology for
-drug-drug interaction surveillance. *Stat Med*. 2008;27(16):3057-70.
+Noren GN, Sundberg R, Bate A, Edwards IR.
+[A statistical methodology for drug-drug interaction surveillance](https://www2.math.su.se/matstat/reports/seriea/2007/rep6/report.pdf).
+*Research Report*. 2007;2007:6. Mathematical Statistics, Stockholm University.
 
-Hult S, Sartori D, Bergvall T, et al. A feasibility study of drug-drug
-interaction signal detection in regular pharmacovigilance. *Drug Saf*.
+Noren GN, Sundberg R, Bate A, Edwards IR. [A statistical methodology for
+drug-drug interaction surveillance](https://doi.org/10.1002/sim.3247). *Stat Med*. 2008;27(16):3057-70.
+
+Hult S, Sartori D, Bergvall T, et al. [A feasibility study of drug-drug
+interaction signal detection in regular pharmacovigilance](https://doi.org/10.1007/s40264-020-00939-y). *Drug Saf*.
 2020;43:775-85.
