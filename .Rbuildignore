@@ -8,3 +8,5 @@
 ^\.claude$
 ^\.github$
 ^codecov\.yml$
+^\.dockerignore$
+^legacy_implementations$
