@@ -5,6 +5,9 @@
 
 <!-- badges: start -->
 
+[![Codecov test
+coverage](https://codecov.io/gh/Uppsala-Monitoring-Centre/PVomega/graph/badge.svg)](https://app.codecov.io/gh/Uppsala-Monitoring-Centre/PVomega)
+[![R-CMD-check](https://github.com/Uppsala-Monitoring-Centre/PVomega/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Uppsala-Monitoring-Centre/PVomega/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of pvOmega is to detect drug-drug-event statistical patterns

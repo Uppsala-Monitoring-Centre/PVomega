@@ -69,7 +69,8 @@ counts <- data.frame(
   n111 = c(10, 45), `n11.` = c(23, 250), `n1.1` = c(10, 120),
   `n.11` = c(19, 85), `n1..` = c(39, 580), `n.1.` = c(1489, 420),
   `n..1` = c(39, 340), `n...` = c(5503, 50000),
-  check.names = FALSE)
+  check.names = FALSE
+)
 ```
 
 Groups of terms can be collapsed with lists, as in DiAna:

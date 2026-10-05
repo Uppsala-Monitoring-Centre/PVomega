@@ -86,15 +86,15 @@
 <h2 id="what-omega-measures">What Omega measures<a class="anchor" aria-label="anchor" href="#what-omega-measures"></a>
 </h2>
 <p>Omega (Noren et al. 2008) is a disproportionality measure for
-drug-drug-event triplets. It compares the observed number of reports
+drug-drug-event combination. It compares the observed number of reports
 listing two drugs and an adverse event with the number expected if the
 two drugs did not interact.</p>
-<p>“No interaction” is defined by an <strong>additive</strong> risk
-model: the risk of the event under both drugs is the background risk
-plus the risk attributable to each drug. This is the key difference from
-logistic regression, whose interaction term assumes multiplicative risks
-and misses well-established interactions such as cerivastatin with
-gemfibrozil.</p>
+<p>“No interaction” is defined by an <strong>additive</strong> model:
+the reporting rate of the event under both drugs is the background
+reporting rate plus the contribution attributable to each drug. This is
+the key difference from logistic regression, whose interaction term
+assumes multiplicative effects of separate drugs and misses
+well-established interactions such as cerivastatin with gemfibrozil.</p>
 <p>The steps are:</p>
 <ol style="list-style-type: decimal">
 <li>Count the reports in each of the four exposure strata: neither drug,
@@ -110,9 +110,8 @@ the paper).</li>
 <code>omega = log2((n111 + 0.5) / (E111 + 0.5))</code> and its Gamma
 credibility interval.</li>
 </ol>
-<p>A triplet is highlighted when <code>omega_lower</code> (Omega025) is
-above 0. With the default shrinkage, at least three reports are needed
-for this.</p>
+<p>A potential interaction is highlighted when <code>omega_lower</code>
+is above 0.</p>
 </div>
 <div class="section level2">
 <h2 id="starting-from-counts">Starting from counts<a class="anchor" aria-label="anchor" href="#starting-from-counts"></a>
@@ -134,52 +133,48 @@ with itraconazole and oral contraceptives.</p>
 <span><span class="co">#&gt; 1:    3.003327    4.790041</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="starting-from-diana-faers-data">Starting from DiAna FAERS data<a class="anchor" aria-label="anchor" href="#starting-from-diana-faers-data"></a>
+<h2 id="starting-from-a-table-of-counts">Starting from a table of counts<a class="anchor" aria-label="anchor" href="#starting-from-a-table-of-counts"></a>
 </h2>
-<p>With the DiAna data and package imported, the DiAna function
-<code>omega_analysis()</code> computes all counts and returns one row
-per drug1-drug2-event combination.</p>
+<p><code><a href="../reference/omega_from_table.html">omega_from_table()</a></code> takes a data frame with one row per
+drug1-drug2-event combination and one column per count
+(<code>n111</code>, <code>n11.</code>, <code>n1.1</code>,
+<code>n.11</code>, <code>n1..</code>, <code>n.1.</code>,
+<code>n..1</code>, <code>n...</code>). Other columns, such as labels,
+are kept in the output.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://fusarolimichele.github.io/DiAna_package/" class="external-link">DiAna</a></span><span class="op">)</span></span>
-<span><span class="va">FAERS_version</span> <span class="op">&lt;-</span> <span class="st">"24Q4"</span></span>
-<span><span class="fu"><a href="https://fusarolimichele.github.io/DiAna_package/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"DEMO"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://fusarolimichele.github.io/DiAna_package/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"DRUG"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://fusarolimichele.github.io/DiAna_package/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"REAC"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">omega_analysis</span><span class="op">(</span></span>
-<span>  drug1_selected <span class="op">=</span> <span class="st">"miconazole"</span>,</span>
-<span>  drug2_selected <span class="op">=</span> <span class="st">"warfarin"</span>,</span>
-<span>  reac_selected <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"international normalised ratio increased"</span>, <span class="st">"haemorrhage"</span><span class="op">)</span>,</span>
-<span>  restriction <span class="op">=</span> <span class="va">Demo</span><span class="op">[</span><span class="op">!</span><span class="va">RB_duplicates_only_susp</span><span class="op">]</span><span class="op">$</span><span class="va">primaryid</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">res</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  drug1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"itraconazole"</span>, <span class="st">"drug A"</span><span class="op">)</span>,</span>
+<span>  drug2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"oral contraceptives"</span>, <span class="st">"drug B"</span><span class="op">)</span>,</span>
+<span>  event <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"delayed bleeding"</span>, <span class="st">"event X"</span><span class="op">)</span>,</span>
+<span>  n111 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">45</span><span class="op">)</span>, `n11.` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">23</span>, <span class="fl">250</span><span class="op">)</span>, `n1.1` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">120</span><span class="op">)</span>,</span>
+<span>  `n.11` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">19</span>, <span class="fl">85</span><span class="op">)</span>, `n1..` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">39</span>, <span class="fl">580</span><span class="op">)</span>, `n.1.` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1489</span>, <span class="fl">420</span><span class="op">)</span>,</span>
+<span>  `n..1` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">39</span>, <span class="fl">340</span><span class="op">)</span>, `n...` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5503</span>, <span class="fl">50000</span><span class="op">)</span>,</span>
+<span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Groups of terms can be collapsed with lists, as in DiAna:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">omega_analysis</span><span class="op">(</span></span>
-<span>  drug1_selected <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>statins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"simvastatin"</span>, <span class="st">"atorvastatin"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  drug2_selected <span class="op">=</span> <span class="st">"clarithromycin"</span>,</span>
-<span>  reac_selected <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>muscle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rhabdomyolysis"</span>, <span class="st">"myopathy"</span>, <span class="st">"myalgia"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/omega_from_table.html">omega_from_table</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
+<span><span class="va">res</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">drug1</span>, <span class="va">drug2</span>, <span class="va">event</span>, <span class="va">f11</span>, <span class="va">g11</span>, <span class="va">omega</span>, <span class="va">omega_lower</span>, <span class="va">omega_upper</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="methodological-choices-to-report">Methodological choices to report<a class="anchor" aria-label="anchor" href="#methodological-choices-to-report"></a>
 </h2>
-<p>Three choices change the counts, and should be stated in any
-publication:</p>
+<p>The counts come from your own data, and three choices made when
+building them change the results. State them in any publication:</p>
 <ul>
 <li>
-<strong>Drug roles</strong> (<code>drug_roles</code>). By default
-only primary suspect, secondary suspect and interacting drugs count as
-exposure, as at Uppsala Monitoring Centre. Reports where a drug is only
-concomitant fall into the background stratum.</li>
+<strong>Drug roles</strong>. Which reported drugs count as exposure.
+At Uppsala Monitoring Centre only primary suspect, secondary suspect and
+interacting drugs count (Hult et al. 2020); reports where a drug is only
+concomitant then fall into the background stratum.</li>
 <li>
-<strong>Deduplication</strong> (<code>restriction</code>). FAERS
-contains duplicate reports. Pass the primary IDs retained by one of
-DiAna’s deduplication algorithms.</li>
+<strong>Deduplication</strong>. Spontaneous reporting databases such
+as FAERS contain duplicate reports, which should be removed before
+counting.</li>
 <li>
-<strong>Report universe</strong>. The total <code>n...</code> is the
-number of distinct reports in <code>temp_reac</code> (within
-<code>restriction</code>). Every count refers to this population.</li>
+<strong>Report universe</strong>. The total <code>n...</code>
+defines the population of reports. Every other count must refer to this
+same set of reports.</li>
 </ul>
 </div>
 <div class="section level2">
@@ -190,13 +185,13 @@ The columns <code>f00</code>, <code>f10</code>, <code>f01</code> and
 <code>f11</code> show why a combination was highlighted. For example, a
 large <code>f10</code> means D1 alone already explains much of the
 reporting.</p>
-<p>The option <code>no_background = TRUE</code> adds
-<code>omega_nb</code>, which assumes no background risk. A large drop
-from <code>omega</code> to <code>omega_nb</code> means the signal
-depends on the estimated background rate.</p>
-<p>Rows flagged <code>"zero_denominator"</code> (one drug never reported
-without the other) have no estimable Omega and return
-<code>NA</code>.</p>
+<p>Omega cannot be estimated when one of the four D1/D2 strata is empty
+(for example, one drug is never reported without the other), or when
+every report in the D1-only, D2-only or neither-drug stratum lists the
+event (<code>f10</code>, <code>f01</code> or <code>f00</code> equal to
+1). Such rows return <code>NA</code> for <code>g11</code>,
+<code>E111</code> and the Omega columns, with a warning that names the
+affected rows and the reason.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -225,7 +220,7 @@ drug-drug interaction signal detection in regular pharmacovigilance.
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer>

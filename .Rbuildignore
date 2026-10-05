@@ -6,3 +6,5 @@
 ^LICENSE\.md$
 ^azure_pipeline$
 ^\.claude$
+^\.github$
+^codecov\.yml$

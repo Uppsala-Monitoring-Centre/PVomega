@@ -138,7 +138,9 @@ or absence (0) of D1, D2 and the event: <code>n111</code>, <code>n110</code>, <c
 <code>n100</code>, <code>n011</code>, <code>n010</code>, <code>n001</code>, <code>n000</code> (they sum to <code>n...</code>);</p></li>
 <li><p>the four exposure strata totals <code>n11.</code>, <code>n10.</code>, <code>n01.</code>, <code>n00.</code>;</p></li>
 <li><p><code>f00</code>, <code>f10</code>, <code>f01</code>, <code>f11</code>, <code>g11</code>, the expected count <code>E111</code>, <code>omega</code>,
-<code>omega_lower</code>, <code>omega_upper</code>.</p></li>
+<code>omega_lower</code>, <code>omega_upper</code>. Each <code>f</code> is <code>NA</code> when its stratum is
+empty; <code>g11</code>, <code>E111</code> and the Omega columns are <code>NA</code> for rows where
+Omega cannot be computed (see Details).</p></li>
 </ul></div>
     <div id="details">
     <h2>Details</h2>
@@ -157,16 +159,20 @@ shrinks Omega towards 0. When \(\alpha_1 \neq \alpha_2\), the prior mean
 is \(\alpha_1 / \alpha_2\) and Omega is shrunk towards
 \(\log_2(\alpha_1 / \alpha_2)\) instead of 0, which changes the meaning of
 the <code>omega_lower &gt; 0</code> signal criterion.</p>
+<p>Omega can only be computed when all four D1/D2 strata contain reports
+(\(n_{11\cdot}\), \(n_{10\cdot}\), \(n_{01\cdot}\),
+\(n_{00\cdot}\) &gt; 0), so that the reporting rates are defined, and when
+\(f_{00}\), \(f_{10}\) and \(f_{01}\) are below 1, so that the odds
+in eq. 16 are finite. \(f_{11} = 1\) is valid. Rows that violate these
+conditions return <code>NA</code> for <code>g11</code>, <code>E111</code> and the Omega columns, and a single
+warning lists the affected rows and the reason. Counts that cannot come from
+one set of reports (e.g. a negative cell) raise an error.</p>
     </div>
     <div id="references">
     <h2>References</h2>
     <p>Noren GN, Sundberg R, Bate A, Edwards IR. A statistical
 methodology for drug-drug interaction surveillance. Stat Med.
-2008;27(16):3057-70. <a href="https://doi.org/10.1002/sim.3247" class="external-link">doi:10.1002/sim.3247</a></p>
-    </div>
-    <div id="see-also">
-    <h2>See also</h2>
-    <div class="dont-index"><p><code>DiAna::omega_analysis()</code> to compute the counts from DiAna FAERS tables.</p></div>
+2008;27(16):3057-70. doi: 10.1002/sim.3247</p>
     </div>
 
     <div id="ref-examples">
@@ -200,7 +206,7 @@ methodology for drug-drug interaction surveillance. Stat Med.
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>
