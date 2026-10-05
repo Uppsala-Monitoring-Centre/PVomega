@@ -12,7 +12,7 @@
 #' @param cred_level Level of the two-sided credibility interval. Passed to
 #'   [omega_from_counts()].
 #'
-#' @return A `data.table` containing any retained input columns followed by
+#' @return A `data.table` containing the input columns followed by
 #'   the results from [omega_from_counts()].
 #'
 #' @examples
