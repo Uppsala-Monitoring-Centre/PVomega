@@ -19,8 +19,8 @@ of adverse event reports.
 You can install the development version of pvOmega like so:
 
 ``` r
-install.packages("devtools")
-devtools::install_github("Uppsala-Monitoring-Centre/PVomega")
+install.packages("pak")
+pak::pak("Uppsala-Monitoring-Centre/PVgravID")
 ```
 
 and upload the library like so:
