@@ -11,6 +11,8 @@ Authors@R: c(
 Description: Implements the Omega interaction disproportionality measure
     of Noren et al. (2008) for data in the DiAna data model.
 License: Apache License (>= 2)
+URL: https://Uppsala-Monitoring-Centre.github.io/pvOmega,
+    https://github.com/Uppsala-Monitoring-Centre/pvOmega
 Depends:
     R (>= 4.1)
 Imports:
