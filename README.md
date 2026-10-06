@@ -23,7 +23,7 @@ install.packages("pak")
 pak::pak("Uppsala-Monitoring-Centre/PVgravID")
 ```
 
-and upload the library like so:
+and load the library like so:
 
 ``` r
 library("pvOmega")
