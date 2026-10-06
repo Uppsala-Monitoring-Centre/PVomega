@@ -10,3 +10,5 @@
 ^codecov\.yml$
 ^\.dockerignore$
 ^legacy_implementations$
+^_pkgdown\.yml$
+^docs$
