@@ -20,7 +20,7 @@ You can install the development version of pvOmega like so:
 
 ``` r
 install.packages("devtools")
-devtools::install_github("fusarolimichele/DiAna_package")
+devtools::install_github("Uppsala-Monitoring-Centre/PVomega")
 ```
 
 and upload the library like so:
