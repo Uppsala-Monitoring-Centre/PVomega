@@ -31,10 +31,10 @@ library("pvOmega")
 
 ## What Omega measures
 
-Omega ([Noren et al. 2008](#noren2008)) is a disproportionality measure
-for drug-drug-event combination. It compares the observed number of
-reports listing two drugs and an adverse event with the number expected
-if the two drugs did not interact.
+Omega ([Noren et al. 2008](#noren-et-al-2008)) is a disproportionality
+measure for drug-drug-event combination. It compares the observed number
+of reports listing two drugs and an adverse event with the number
+expected if the two drugs did not interact.
 
 “No interaction” is defined by an **additive** model: the reporting rate
 of the event under both drugs is the background reporting rate plus the
@@ -135,16 +135,21 @@ much of the reporting.
 
 ## References
 
+### Noren et al. 2007
+
 Noren GN, Sundberg R, Bate A, Edwards IR. [A statistical methodology for
 drug-drug interaction
 surveillance](https://www2.math.su.se/matstat/reports/seriea/2007/rep6/report.pdf).
 *Research Report*. 2007;2007:6. Mathematical Statistics, Stockholm
 University.
 
-<a id="noren2008"></a> Noren GN, Sundberg R, Bate A, Edwards IR. [A
-statistical methodology for drug-drug interaction
-surveillance](https://doi.org/10.1002/sim.3247). *Stat Med*.
-2008;27(16):3057-70.
+### Noren et al. 2008
+
+Noren GN, Sundberg R, Bate A, Edwards IR. [A statistical methodology for
+drug-drug interaction surveillance](https://doi.org/10.1002/sim.3247).
+*Stat Med*. 2008;27(16):3057-70.
+
+### Hult et al. 2020
 
 Hult S, Sartori D, Bergvall T, et al. [A feasibility study of drug-drug
 interaction signal detection in regular
