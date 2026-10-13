@@ -153,3 +153,17 @@ test_that("omega_from_counts validates omega and credibility interval against di
     )
   }
 })
+
+test_that("zero denominators raise informative warnings", {
+  expect_warning(
+    res <- omega_from_counts(2, 5, 2, 3, 5, 10, 10, 1000),
+    "n10. = 0"
+  )
+  expect_true(is.na(res$omega))
+  expect_warning(
+    res <- omega_from_counts(2, 5, 4, 3, 7, 10, 10, 1000),
+    "1 - f = 0"
+  )
+  expect_equal(res$g11, 1)
+  expect_warning(omega_from_counts(0, 0, 3, 2, 8, 5, 10, 1000), "n11. = 0")
+})
