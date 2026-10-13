@@ -1,0 +1,114 @@
+trigger:
+  branches:
+    include:
+      - main
+      - hotfix/*
+  paths:
+    exclude:
+      - README.md
+      - docs/*
+
+resources:
+  repositories:
+    - repository: self
+      ref: main
+      clean: true
+      fetchDepth: 1
+    - repository: research_devops_templates
+      name: 'research-devops-templates'
+      ref: 'refs/heads/main'
+      type: git
+
+variables:
+  - template: variables/vars-shared-devops.yml@research_devops_templates
+  - name: containerRegistry
+    value: "acrdevtestumcdatascience.azurecr.io"
+  - name: imageRepository
+    value: "pvomega_ci"
+  - name: dockerRegistryServiceConnection
+    value: "wi-devops-acr-acrdevtestumcdatascience-01"
+
+stages:
+  # Reuse the CI image for the current Dockerfile and locked R dependencies.
+  # A change to either file produces a new image tag.
+  - stage: PipelineValidation
+    displayName: Prepare CI image and validate
+    pool:
+      vmImage: $(linuxDockerBuildAgentVmImage)
+    jobs:
+      - job: Validation
+        displayName: Reuse or build CI image and run checks
+        variables:
+          runValidation: $[ or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) ]
+          dockerRun: >-
+            docker run --rm --pull=never
+            -v $(Build.SourcesDirectory):/work -w /work
+        steps:
+          - task: Docker@2
+            displayName: Log in to ACR
+            inputs:
+              command: login
+              containerRegistry: $(dockerRegistryServiceConnection)
+
+          - bash: |
+              set -euo pipefail
+              TAG=$(sha256sum azure_pipeline/Dockerfile renv.lock | sha256sum | cut -c1-12)
+              echo "CI environment content tag: $TAG"
+              echo "##vso[task.setvariable variable=imageTag]$TAG"
+            name: computeTag
+            displayName: Compute the CI environment content tag
+
+          - bash: |
+              set -euo pipefail
+              REF="$(containerRegistry)/$(imageRepository):$(imageTag)"
+              if docker buildx imagetools inspect "$REF" > /dev/null 2>&1; then
+                echo "$REF already exists - the build step will be skipped."
+                EXISTS=true
+              else
+                echo "$REF not found - the build step will build and push it."
+                EXISTS=false
+              fi
+              echo "##vso[task.setvariable variable=imageExists]$EXISTS"
+            name: checkImage
+            displayName: Check whether the tag is already in the registry
+
+          - task: Docker@2
+            displayName: Build and push image only when missing
+            condition: and(succeeded(), eq(variables['imageExists'], 'false'))
+            inputs:
+              command: buildAndPush
+              containerRegistry: $(dockerRegistryServiceConnection)
+              repository: $(imageRepository)
+              dockerfile: azure_pipeline/Dockerfile
+              buildContext: $(Build.SourcesDirectory)
+              tags: $(imageTag)
+
+          - bash: |
+              set -euo pipefail
+              docker pull "$(containerRegistry)/$(imageRepository):$(imageTag)"
+            condition: and(succeeded(), eq(variables['runValidation'], 'true'), eq(variables['imageExists'], 'true'))
+            displayName: Pull existing CI image once
+
+          - bash: |
+              set -euo pipefail
+              $(dockerRun) $(containerRegistry)/$(imageRepository):$(imageTag) \
+                Rscript --vanilla -e "styler::style_dir('R', dry = 'fail'); styler::style_dir('tests', dry = 'fail')"
+            condition: and(succeeded(), eq(variables['runValidation'], 'true'))
+            displayName: Check R style formatting
+
+          - bash: |
+              set -euo pipefail
+              $(dockerRun) $(containerRegistry)/$(imageRepository):$(imageTag) \
+                Rscript --vanilla -e "devtools::test(stop_on_failure = TRUE)"
+            condition: and(succeeded(), eq(variables['runValidation'], 'true'))
+            displayName: Run tests
+
+          # - bash: |
+          #     $(dockerRun) $(containerRegistry)/$(imageRepository):$(imageTag) \
+          #       python -m sqlfluff lint --ignore parsing,templating --rules LT01,LT02,LT09,LT12,LT13,LT15 sql
+          #   displayName: Check SQL formatting
+
+          # - bash: |
+          #     $(dockerRun) $(containerRegistry)/$(imageRepository):$(imageTag) \
+          #       python -m sqlfluff lint --ignore parsing,templating sql
+          #   displayName: Check SQL linting

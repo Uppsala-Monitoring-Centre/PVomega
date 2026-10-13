@@ -18,7 +18,7 @@ omega_from_table(x, alpha1 = 0.5, alpha2 = 0.5, cred_level = 0.95)
 \code{\link[=omega_from_counts]{omega_from_counts()}}.}
 }
 \value{
-A \code{data.table} containing any retained input columns followed by
+A \code{data.table} containing the input columns followed by
 the results from \code{\link[=omega_from_counts]{omega_from_counts()}}.
 }
 \description{
