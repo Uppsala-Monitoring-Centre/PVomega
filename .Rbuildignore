@@ -4,3 +4,12 @@
 ^\.Rproj\.user$
 ^README\.Rmd$
 ^LICENSE\.md$
+^azure_pipeline$
+^\.claude$
+^\.github$
+^codecov\.yml$
+^\.dockerignore$
+^legacy_implementations$
+^_pkgdown\.yml$
+^docs$
+^vignettes/articles$
