@@ -96,16 +96,16 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
   lens <- lengths(counts)
   if (any(lens == 0L)) {
     stop("Count(s) of length zero: ",
-         paste(names(lens)[lens == 0L], collapse = ", "), ".",
-         call. = FALSE
+      paste(names(lens)[lens == 0L], collapse = ", "), ".",
+      call. = FALSE
     )
   }
 
   len <- max(lens)
   if (any(lens != 1L & lens != len)) {
     stop("All counts must have the same length, or length 1. Lengths: ",
-         paste0(names(lens), " = ", lens, collapse = ", "), ".",
-         call. = FALSE
+      paste0(names(lens), " = ", lens, collapse = ", "), ".",
+      call. = FALSE
     )
   }
   counts <- lapply(counts, function(x) rep_len(as.numeric(x), len))
@@ -154,19 +154,29 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
 
   # ---- warnings for zero denominators ---------------------------------------
   # (1) a stratum total is 0, so its relative reporting rate is undefined
-  warn_zero_denominator(n00. == 0, "n00. = 0 (no report without D1 and D2)",
-                        "f00, g11 and omega are NA")
-  warn_zero_denominator(n10. == 0, "n10. = 0 (D1 never reported without D2)",
-                        "f10, g11 and omega are NA")
-  warn_zero_denominator(n01. == 0, "n01. = 0 (D2 never reported without D1)",
-                        "f01, g11 and omega are NA")
-  warn_zero_denominator(n11. == 0, "n11. = 0 (D1 and D2 never reported together)",
-                        "f11 is NA and E111 is 0")
+  warn_zero_denominator(
+    n00. == 0, "n00. = 0 (no report without D1 and D2)",
+    "f00, g11 and omega are NA"
+  )
+  warn_zero_denominator(
+    n10. == 0, "n10. = 0 (D1 never reported without D2)",
+    "f10, g11 and omega are NA"
+  )
+  warn_zero_denominator(
+    n01. == 0, "n01. = 0 (D2 never reported without D1)",
+    "f01, g11 and omega are NA"
+  )
+  warn_zero_denominator(
+    n11. == 0, "n11. = 0 (D1 and D2 never reported together)",
+    "f11 is NA and E111 is 0"
+  )
   # (2) f = 1, so the odds f / (1 - f) divide by zero; odds are set to Inf
-  warn_zero_denominator(!is.na(f00) & f00 >= 1 | !is.na(f10) & f10 >= 1 |
-                          !is.na(f01) & f01 >= 1,
-                        "1 - f = 0 in the odds (all reports in a stratum list the event)",
-                        "the odds are set to Inf and g11 to 1")
+  warn_zero_denominator(
+    !is.na(f00) & f00 >= 1 | !is.na(f10) & f10 >= 1 |
+      !is.na(f01) & f01 >= 1,
+    "1 - f = 0 in the odds (all reports in a stratum list the event)",
+    "the odds are set to Inf and g11 to 1"
+  )
 
   # ---- expected relative reporting rate (eq. 16) ---------------------------
   den <- pmax(o00, o10) + pmax(o00, o01) - o00 + 1
@@ -212,7 +222,8 @@ warn_zero_denominator <- function(condition, what, consequence) {
   shown <- paste(utils::head(rows, 5L), collapse = ", ")
   if (length(rows) > 5L) shown <- paste0(shown, ", ... (", length(rows), " rows)")
   warning("Zero denominator: ", what, " in row(s) ", shown, "; ", consequence, ".",
-          call. = FALSE)
+    call. = FALSE
+  )
   invisible(TRUE)
 }
 
