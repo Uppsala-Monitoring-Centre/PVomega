@@ -36,10 +36,10 @@ omega_from_counts(
 \item{n...}{Total number of reports.}
 
 \item{alpha1}{Shrinkage added to the observed count: the shape of the
-Gamma prior (default 0.5, as in the paper). Must be > 0.}
+Gamma prior (default 0.5, as in the paper). Must be >= 0.}
 
 \item{alpha2}{Shrinkage added to the expected count: the rate of the
-Gamma prior (default 0.5, as in the paper). Must be > 0.}
+Gamma prior (default 0.5, as in the paper). Must be >= 0.}
 
 \item{cred_level}{Level of the two-sided credibility interval (default
 0.95, giving Omega025 and Omega975).}
@@ -107,4 +107,7 @@ omega_from_counts(
 Noren GN, Sundberg R, Bate A, Edwards IR. A statistical
 methodology for drug-drug interaction surveillance. Stat Med.
 2008;27(16):3057-70. doi: 10.1002/sim.3247
+}
+\seealso{
+\code{\link[DiAna:omega_analysis]{DiAna::omega_analysis()}} in the DiAna R package to compute the counts from DiAna FAERS tables.
 }
