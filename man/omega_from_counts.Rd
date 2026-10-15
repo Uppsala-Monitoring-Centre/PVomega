@@ -108,6 +108,3 @@ Noren GN, Sundberg R, Bate A, Edwards IR. A statistical
 methodology for drug-drug interaction surveillance. Stat Med.
 2008;27(16):3057-70. doi: 10.1002/sim.3247
 }
-\seealso{
-\code{\link[DiAna:omega_analysis]{DiAna::omega_analysis()}} in the DiAna R package to compute the counts from DiAna FAERS tables.
-}
