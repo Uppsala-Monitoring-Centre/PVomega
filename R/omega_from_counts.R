@@ -181,32 +181,6 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
   o10 <- odds(f10)
   o01 <- odds(f01)
 
-  # ---- warnings for zero denominators ---------------------------------------
-  # (1) a stratum total is 0, so its relative reporting rate is undefined
-  warn_zero_denominator(
-    n00. == 0, "n00. = 0 (no report without D1 and D2)",
-    "f00, g11 and omega are NA"
-  )
-  warn_zero_denominator(
-    n10. == 0, "n10. = 0 (D1 never reported without D2)",
-    "f10, g11 and omega are NA"
-  )
-  warn_zero_denominator(
-    n01. == 0, "n01. = 0 (D2 never reported without D1)",
-    "f01, g11 and omega are NA"
-  )
-  warn_zero_denominator(
-    n11. == 0, "n11. = 0 (D1 and D2 never reported together)",
-    "f11 is NA and E111 is 0"
-  )
-  # (2) f = 1, so the odds f / (1 - f) divide by zero; odds are set to Inf
-  warn_zero_denominator(
-    !is.na(f00) & f00 >= 1 | !is.na(f10) & f10 >= 1 |
-      !is.na(f01) & f01 >= 1,
-    "1 - f = 0 in the odds (all reports in a stratum list the event)",
-    "the odds are set to Inf and g11 to 1"
-  )
-
   # ---- expected relative reporting rate (eq. 16) ---------------------------
   g11 <- 1 - 1 / (pmax(o00, o10) + pmax(o00, o01) - o00 + 1)
 
@@ -236,25 +210,6 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
 
   out[]
 }
-
-#' Warn when a denominator is zero
-#' Issues one warning per type of zero denominator, listing the affected rows
-#' (at most 5) and the consequence for the results. `NA` conditions are
-#' ignored.
-#' @noRd
-warn_zero_denominator <- function(condition, what, consequence) {
-  rows <- which(condition)
-  if (length(rows) == 0L) {
-    return(invisible(FALSE))
-  }
-  shown <- paste(utils::head(rows, 5L), collapse = ", ")
-  if (length(rows) > 5L) shown <- paste0(shown, ", ... (", length(rows), " rows)")
-  warning("Zero denominator: ", what, " in row(s) ", shown, "; ", consequence, ".",
-    call. = FALSE
-  )
-  invisible(TRUE)
-}
-
 
 #' Check that report counts form a valid 2x2x2 table
 #'

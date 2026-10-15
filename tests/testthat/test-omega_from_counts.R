@@ -154,7 +154,7 @@ test_that("omega_from_counts validates omega and credibility interval against di
   }
 })
 
-test_that("zero denominators raise informative warnings", {
+test_that("degenerate tables raise one informative warning", {
   expect_warning(
     res <- omega_from_counts(2, 5, 2, 3, 5, 10, 10, 1000),
     "n10. = 0"
@@ -162,7 +162,7 @@ test_that("zero denominators raise informative warnings", {
   expect_true(is.na(res$omega))
   expect_warning(
     res <- omega_from_counts(2, 5, 4, 3, 7, 10, 10, 1000),
-    "1 - f = 0"
+    "f10 = 1"
   )
   expect_true(is.na(res$g11))
   expect_warning(omega_from_counts(0, 0, 3, 2, 8, 5, 10, 1000), "n11. = 0")
