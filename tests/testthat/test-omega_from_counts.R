@@ -164,6 +164,6 @@ test_that("zero denominators raise informative warnings", {
     res <- omega_from_counts(2, 5, 4, 3, 7, 10, 10, 1000),
     "1 - f = 0"
   )
-  expect_equal(res$g11, 1)
+  expect_true(is.na(res$g11))
   expect_warning(omega_from_counts(0, 0, 3, 2, 8, 5, 10, 1000), "n11. = 0")
 })
