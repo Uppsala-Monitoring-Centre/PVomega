@@ -120,6 +120,7 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
   }
   counts <- lapply(counts, function(x) rep_len(as.numeric(x), len))
   list2env(counts, envir = environment())
+  do.call(check_count_consistency, counts)
 
   # ---- cells of the 2x2x2 table (inclusion-exclusion) ----------------------
   n10. <- n1.. - n11.
@@ -132,23 +133,6 @@ omega_from_counts <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n...,
   n100 <- n10. - n101
   n010 <- n01. - n011
   n000 <- n00. - n001
-
-  cells <- list(
-    n10. = n10., n01. = n01., n00. = n00.,
-    n101 = n101, n011 = n011, n001 = n001
-  )
-
-  bad <- vapply(cells, function(x) any(x < 0, na.rm = TRUE), logical(1))
-  if (any(bad)) {
-    stop("Inconsistent counts: negative cell(s) ",
-      paste(names(cells)[bad], collapse = ", "),
-      ". Check that the marginal counts refer to the same set of reports.",
-      call. = FALSE
-    )
-  }
-  if (any(n111 > n11. | n111 > n1.1 | n111 > n.11, na.rm = TRUE)) {
-    stop("Inconsistent counts: `n111` exceeds a two-way count.", call. = FALSE)
-  }
 
   # ---- Omega-specific validity (rows set to NA with a warning) --------------
   rules <- omega_validity(n11., n10., n01., n00., n001, n101, n011)
@@ -275,8 +259,7 @@ check_count_consistency <- function(n111, n11., n1.1, n.11, n1.., n.1., n..1, n.
 #' Omega needs all four D1/D2 strata to be non-empty (otherwise a reporting
 #' rate is undefined) and `f00`, `f10`, `f01` < 1 (eq. 16 uses `f / (1 - f)`).
 #' `f11 = 1` is valid. The rate rules are only tested where the stratum is
-#' non-empty, so each invalid row is reported for its root cause. `>=` also
-#' catches `f > 1` from counts the consistency checks do not cover.
+#' non-empty, so each invalid row is reported for its root cause.
 #'
 #' @return A named list of logical vectors, `TRUE` where the rule is violated.
 #'   The names are used in the warning message.
