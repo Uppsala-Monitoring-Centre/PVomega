@@ -1,15 +1,15 @@
 # Changelog
 
-## pvOmega 0.0.0.9000
+## PVomega 0.0.0.9000
 
 ### New features
 
 - Added
-  [`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/pvOmega/reference/omega_from_counts.md)
+  [`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/PVomega/reference/omega_from_counts.md)
   for calculating the Omega measure from observed and expected counts.
 
 - Added
-  [`omega_from_table()`](https://Uppsala-Monitoring-Centre.github.io/pvOmega/reference/omega_from_table.md)
+  [`omega_from_table()`](https://Uppsala-Monitoring-Centre.github.io/PVomega/reference/omega_from_table.md)
   for calculating Omega from a contingency table.
 
 ### Documentation

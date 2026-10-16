@@ -2,7 +2,7 @@
 
 ``` r
 
-library(pvOmega)
+library(PVomega)
 ```
 
 ## What Omega measures
@@ -35,7 +35,7 @@ A potential interaction is highlighted when `omega_lower` is above 0.
 
 ## Starting from counts
 
-[`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/pvOmega/reference/omega_from_counts.md)
+[`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/PVomega/reference/omega_from_counts.md)
 works with any data source. The example below is the first case study of
 the paper: delayed bleeding with itraconazole and oral contraceptives.
 
@@ -56,7 +56,7 @@ res[, .(f00, f10, f01, f11, g11, E111, omega, omega_lower, omega_upper)]
 
 ## Starting from a table of counts
 
-[`omega_from_table()`](https://Uppsala-Monitoring-Centre.github.io/pvOmega/reference/omega_from_table.md)
+[`omega_from_table()`](https://Uppsala-Monitoring-Centre.github.io/PVomega/reference/omega_from_table.md)
 takes a data frame with one row per drug1-drug2-event combination and
 one column per count (`n111`, `n11.`, `n1.1`, `n.11`, `n1..`, `n.1.`,
 `n..1`, `n...`). Other columns, such as labels, are kept in the output.

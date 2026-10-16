@@ -61,12 +61,12 @@ omega_from_counts(
 - alpha1:
 
   Shrinkage added to the observed count: the shape of the Gamma prior
-  (default 0.5, as in the paper). Must be \>= 0.
+  (default 0.5, as in the paper). Must be \> 0.
 
 - alpha2:
 
   Shrinkage added to the expected count: the rate of the Gamma prior
-  (default 0.5, as in the paper). Must be \>= 0.
+  (default 0.5, as in the paper). Must be \> 0.
 
 - cred_level:
 

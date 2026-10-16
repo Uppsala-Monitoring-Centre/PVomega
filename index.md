@@ -1,24 +1,24 @@
-# pvOmega
+# PVomega
 
-The goal of pvOmega is to detect drug-drug-event statistical patterns
+The goal of PVomega is to detect drug-drug-event statistical patterns
 supporting hypotheses generation on drug-drug interactions in databases
 of adverse event reports.
 
 ## Installation
 
-You can install the development version of pvOmega like so:
+You can install the development version of PVomega like so:
 
 ``` r
 
 install.packages("pak")
-pak::pak("Uppsala-Monitoring-Centre/PVgravID")
+pak::pak("Uppsala-Monitoring-Centre/PVomega")
 ```
 
 and load the library like so:
 
 ``` r
 
-library("pvOmega")
+library("PVomega")
 ```
 
 ## What Omega measures
@@ -51,7 +51,7 @@ A potential interaction is highlighted when `omega_lower` is above 0.
 
 ## Starting from counts
 
-[`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/pvOmega/reference/omega_from_counts.md)
+[`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/PVomega/reference/omega_from_counts.md)
 works with any data source. The example below is the first case study of
 the paper: delayed bleeding with itraconazole and oral contraceptives.
 
