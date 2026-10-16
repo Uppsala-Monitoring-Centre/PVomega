@@ -16,7 +16,9 @@ URL: https://Uppsala-Monitoring-Centre.github.io/pvOmega,
 Depends:
     R (>= 4.1)
 Imports:
-    data.table
+    data.table,
+    stats,
+    utils
 Suggests:
     devtools,
     knitr,
