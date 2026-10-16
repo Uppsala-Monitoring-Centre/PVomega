@@ -1,4 +1,4 @@
-Package: pvOmega
+Package: PVomega
 Title: Omega Shrinkage Measure for Drug-Drug Interaction Signal Detection
 Version: 0.0.0.9000
 Authors@R: c(
@@ -9,10 +9,11 @@ Authors@R: c(
     person("Niklas", "Noren", , "niklas.noren@who-umc.org", role = "aut")
   )
 Description: Implements the Omega interaction disproportionality measure
-    of Noren et al. (2008) for data in the DiAna data model.
+    of Noren et al. (2008) for drug-drug interaction signal detection in
+    databases of adverse event reports.
 License: Apache License (>= 2)
-URL: https://Uppsala-Monitoring-Centre.github.io/pvOmega,
-    https://github.com/Uppsala-Monitoring-Centre/pvOmega
+URL: https://Uppsala-Monitoring-Centre.github.io/PVomega,
+    https://github.com/Uppsala-Monitoring-Centre/PVomega
 Depends:
     R (>= 4.1)
 Imports:

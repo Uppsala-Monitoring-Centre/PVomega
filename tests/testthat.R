@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(pvOmega)
+library(PVomega)
 
-test_check("pvOmega")
+test_check("PVomega")

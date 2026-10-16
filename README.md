@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# pvOmega
+# PVomega
 
 <!-- badges: start -->
 
@@ -10,23 +10,23 @@ coverage](https://codecov.io/gh/Uppsala-Monitoring-Centre/PVomega/graph/badge.sv
 [![R-CMD-check](https://github.com/Uppsala-Monitoring-Centre/PVomega/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Uppsala-Monitoring-Centre/PVomega/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-The goal of pvOmega is to detect drug-drug-event statistical patterns
+The goal of PVomega is to detect drug-drug-event statistical patterns
 supporting hypotheses generation on drug-drug interactions in databases
 of adverse event reports.
 
 ## Installation
 
-You can install the development version of pvOmega like so:
+You can install the development version of PVomega like so:
 
 ``` r
 install.packages("pak")
-pak::pak("Uppsala-Monitoring-Centre/PVgravID")
+pak::pak("Uppsala-Monitoring-Centre/PVomega")
 ```
 
 and load the library like so:
 
 ``` r
-library("pvOmega")
+library("PVomega")
 ```
 
 ## What Omega measures

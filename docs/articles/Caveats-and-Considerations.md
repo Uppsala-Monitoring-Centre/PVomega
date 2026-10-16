@@ -107,4 +107,4 @@ the report population.
 
 If you would like to provide feedback on the package, report an issue,
 or discuss its use, please contact Uppsala Monitoring Centre or open an
-issue in the pvOmega repository.
+issue in the PVomega repository.

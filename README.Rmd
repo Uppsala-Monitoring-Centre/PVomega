@@ -13,29 +13,29 @@ knitr::opts_chunk$set(
 )
 ```
 
-# pvOmega
+# PVomega
 
 <!-- badges: start -->
 [![Codecov test coverage](https://codecov.io/gh/Uppsala-Monitoring-Centre/PVomega/graph/badge.svg)](https://app.codecov.io/gh/Uppsala-Monitoring-Centre/PVomega)
 [![R-CMD-check](https://github.com/Uppsala-Monitoring-Centre/PVomega/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Uppsala-Monitoring-Centre/PVomega/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-The goal of pvOmega is to detect drug-drug-event statistical patterns supporting hypotheses generation on drug-drug interactions in databases of adverse event reports. 
+The goal of PVomega is to detect drug-drug-event statistical patterns supporting hypotheses generation on drug-drug interactions in databases of adverse event reports. 
 
 ## Installation
 
-You can install the development version of pvOmega like so:
+You can install the development version of PVomega like so:
 
 
 ```{r install, eval=FALSE}
 install.packages("pak")
-pak::pak("Uppsala-Monitoring-Centre/PVgravID")
+pak::pak("Uppsala-Monitoring-Centre/PVomega")
 ```
 
 and load the library like so:
 
 ```{r setup}
-library("pvOmega")
+library("PVomega")
 ```
 
 ## What Omega measures

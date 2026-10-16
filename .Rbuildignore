@@ -1,6 +1,6 @@
 ^renv$
 ^renv\.lock$
-^pvOmega\.Rproj$
+^PVomega\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
 ^LICENSE\.md$

@@ -1,10 +1,10 @@
 # Compute Omega from a table of report counts
 
 Convenience wrapper around
-[`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/pvOmega/reference/omega_from_counts.md)
+[`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/PVomega/reference/omega_from_counts.md)
 for tabular input. The input must contain one column for each of the
 eight report counts required by
-[`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/pvOmega/reference/omega_from_counts.md).
+[`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/PVomega/reference/omega_from_counts.md).
 Computation is vectorised, so one output row is returned for each input
 row.
 
@@ -24,26 +24,26 @@ omega_from_table(x, alpha1 = 0.5, alpha2 = 0.5, cred_level = 0.95)
 - alpha1:
 
   Shrinkage tuning parameter for the observed count. Passed to
-  [`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/pvOmega/reference/omega_from_counts.md).
+  [`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/PVomega/reference/omega_from_counts.md).
 
 - alpha2:
 
   Shrinkage tuning parameter for the expected count. Passed to
-  [`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/pvOmega/reference/omega_from_counts.md).
+  [`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/PVomega/reference/omega_from_counts.md).
 
 - cred_level:
 
   Level of the two-sided credibility interval. Passed to
-  [`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/pvOmega/reference/omega_from_counts.md).
+  [`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/PVomega/reference/omega_from_counts.md).
 
 ## Value
 
 A `data.table` containing the input columns followed by the results from
-[`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/pvOmega/reference/omega_from_counts.md).
+[`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/PVomega/reference/omega_from_counts.md).
 
 ## See also
 
-[`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/pvOmega/reference/omega_from_counts.md)
+[`omega_from_counts()`](https://Uppsala-Monitoring-Centre.github.io/PVomega/reference/omega_from_counts.md)
 
 ## Examples
 

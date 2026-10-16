@@ -1,4 +1,4 @@
-# pvOmega 0.0.0.9000
+# PVomega 0.0.0.9000
 
 ## New features
 
