@@ -234,3 +234,10 @@ test_that("consistency checks ignore NA and accept boundary counts", {
     n1.. = 5, n.1. = 5, n..1 = 5, n... = 5
   ))
 })
+
+test_that("alpha1 and alpha2 must be single numbers > 0", {
+  for (bad in list(0, -1, NA_real_, c(0.5, 0.5), "0.5")) {
+    expect_error(omega_with(alpha1 = bad), "`alpha1` must be a single number > 0.", fixed = TRUE)
+    expect_error(omega_with(alpha2 = bad), "`alpha2` must be a single number > 0.", fixed = TRUE)
+  }
+})
