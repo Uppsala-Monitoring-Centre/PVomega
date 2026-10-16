@@ -167,3 +167,70 @@ test_that("degenerate tables raise one informative warning", {
   expect_true(is.na(res$g11))
   expect_warning(omega_from_counts(0, 0, 3, 2, 8, 5, 10, 1000), "n11. = 0")
 })
+
+test_that("inconsistent counts raise an error naming the violated rule", {
+  # base cells: n110 = 8, n101 = 3, n011 = 2, n100 = 17, n010 = 28,
+  # n001 = 43, n000 = 907
+  cases <- list(
+    "n111 <= n11." = list(n111 = 11),
+    "n111 <= n1.1" = list(n111 = 6, n11. = 10),
+    "n111 <= n.11" = list(n111 = 5, n1.1 = 6),
+    "n11. <= n1.." = list(n11. = 35),
+    "n11. <= n.1." = list(n11. = 42, n1.. = 50),
+    "n1.1 <= n1.." = list(n1.1 = 31),
+    "n1.1 <= n..1" = list(n1.1 = 25, n..1 = 20),
+    "n.11 <= n.1." = list(n.11 = 41),
+    "n.11 <= n..1" = list(n.11 = 30, n..1 = 25),
+    "n1.. <= n..." = list(n1.. = 1001),
+    "n.1. <= n..." = list(n.1. = 1001),
+    "n..1 <= n..." = list(n..1 = 1001)
+  )
+  for (rule in names(cases)) {
+    expect_error(
+      do.call(omega_with, cases[[rule]]),
+      paste(rule, "violated in row(s) 1"),
+      fixed = TRUE,
+      info = rule
+    )
+  }
+})
+
+test_that("negative cells are caught even when all subset rules hold", {
+  cases <- list(
+    "cell D1 only, no event >= 0" = list(n1.1 = 25),
+    "cell D2 only, no event >= 0" = list(n.11 = 35),
+    "cell event only, no drug >= 0" = list(n..1 = 6),
+    "cell no drug, no event >= 0" = list(n... = 100)
+  )
+  for (rule in names(cases)) {
+    msg <- tryCatch(do.call(omega_with, cases[[rule]]), error = conditionMessage)
+    expect_match(msg, "Inconsistent counts", fixed = TRUE, info = rule)
+    expect_match(msg, rule, fixed = TRUE, info = rule)
+    expect_no_match(msg, "<=", fixed = TRUE, info = rule)
+  }
+})
+
+test_that("all violations are reported in one error with their rows", {
+  msg <- tryCatch(
+    omega_from_counts(
+      n111 = c(2, 11, 2), n11. = 10, n1.1 = 5, n.11 = 4,
+      n1.. = c(30, 30, 1001), n.1. = 40, n..1 = 50, n... = 1000
+    ),
+    error = conditionMessage
+  )
+  expect_match(msg, "n111 <= n11. violated in row(s) 2", fixed = TRUE)
+  expect_match(msg, "n1.. <= n... violated in row(s) 3", fixed = TRUE)
+  expect_match(msg, "same set of reports", fixed = TRUE)
+})
+
+test_that("consistency checks ignore NA and accept boundary counts", {
+  expect_true(check_count_consistency(
+    n111 = NA, n11. = 10, n1.1 = 5, n.11 = 4,
+    n1.. = 30, n.1. = 40, n..1 = 50, n... = 1000
+  ))
+  # every subset rule holds with equality and n000 = 0
+  expect_true(check_count_consistency(
+    n111 = 5, n11. = 5, n1.1 = 5, n.11 = 5,
+    n1.. = 5, n.1. = 5, n..1 = 5, n... = 5
+  ))
+})
