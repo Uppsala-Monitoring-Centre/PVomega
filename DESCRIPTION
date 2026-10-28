@@ -1,6 +1,6 @@
 Package: PVomega
 Title: Omega Shrinkage Measure for Drug-Drug Interaction Signal Detection
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: c(
     person("Valentina", "Giunchi", , "valentina.giunchi@who-umc.org", role = c("aut", "cre")),
     person("Michele", "Fusaroli", , "michele.fusaroli@who-umc.org", role = "aut"),

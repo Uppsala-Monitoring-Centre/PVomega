@@ -1,4 +1,6 @@
-# PVomega 0.0.0.9000
+# PVomega 1.0.0
+
+* First public release.
 
 ## New features
 
@@ -19,6 +21,8 @@
   considerations when applying and interpreting Omega, including limitations
   related to spontaneous reporting data, sparse data, analysis choices, and
   statistical interaction signals.
+
+* Added a package logo.
 
 * Added references to the original methodological work on Omega and related
   applications in pharmacovigilance.
