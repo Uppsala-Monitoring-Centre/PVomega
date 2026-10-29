@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   articles/Caveats-and-Considerations: Caveats-and-Considerations.html
   omega: omega.html
-last_built: 2026-10-28T14:36Z
+last_built: 2026-10-29T18:03Z
 urls:
   reference: https://Uppsala-Monitoring-Centre.github.io/PVomega/reference
   article: https://Uppsala-Monitoring-Centre.github.io/PVomega/articles
