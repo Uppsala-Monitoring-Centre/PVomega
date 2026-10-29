@@ -4,15 +4,15 @@ Version: 1.0.0
 Authors@R: c(
     person("Valentina", "Giunchi", , "valentina.giunchi@who-umc.org", role = c("aut", "cre")),
     person("Michele", "Fusaroli", , "michele.fusaroli@who-umc.org", role = "aut"),
-    person("Pablo", "Maldonaldo Jimenez", , "pablo.maldonaldo@who-umc.org", role = "aut"),
+    person("Pablo", "Maldonado Jimenez", , "pablo.maldonaldo@who-umc.org", role = "aut"),
     person("Douglas", "Potter", , "douglas.potter@who-umc.org", role = "aut"),
     person("Niklas", "Noren", , "niklas.noren@who-umc.org", role = "aut")
   )
 Description: Implements the Omega interaction disproportionality measure
-    of Noren et al. (2008) for drug-drug interaction signal detection in
-    databases of adverse event reports.
+    of Noren et al. (2008) <doi:10.1002/sim.3247> for drug-drug interaction
+    signal detection in databases of adverse event reports.
 License: Apache License (>= 2)
-URL: https://Uppsala-Monitoring-Centre.github.io/PVomega,
+URL: https://uppsala-monitoring-centre.github.io/PVomega/,
     https://github.com/Uppsala-Monitoring-Centre/PVomega
 Depends:
     R (>= 4.1)
