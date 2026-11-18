@@ -12,7 +12,7 @@ Description: Implements the Omega interaction disproportionality measure
     of Noren et al. (2008) <doi:10.1002/sim.3247> for drug-drug interaction
     signal detection in databases of adverse event reports.
 License: Apache License (>= 2)
-URL: https://uppsala-monitoring-centre.github.io/PVomega/,
+URL: https://Uppsala-Monitoring-Centre.github.io/PVomega/,
     https://github.com/Uppsala-Monitoring-Centre/PVomega
 Depends:
     R (>= 4.1)
